@@ -1,17 +1,21 @@
-db.define_table('fixed_budget',
+db.define_table('changing_budget',
                 Field('user_id', db.auth_user),
-                Field('food_and_drink'),
-                Field('medical_health_related'),
-                Field('transportation'),
-                Field('education'),
-                Field('entertainment')
+                Field('c1', default='food_and_drink'),
+                Field('c2', default='medical_health_related'),
+                Field('c3', default='transportation'),
+                Field('c4', default='education'),
+                Field('c5', default='entertainment'),
+                Field('c6', default="new category1"),
+                Field('c7', default="new category2"),
+                Field('c8', default="new category3"),
+                Field('c9', default="new category4"),
                 )
 
-db.define_table('changing_budget_category',
+db.define_table('fixed_budget',
                 Field('user_id', db.auth_user),
-                Field('rent'),
-                Field('car_insurance_registration'),
-                Field('sportify_subscription'),
+                Field('c1', default='rent'),
+                Field('c2', default='car_insurance_registration'),
+                Field('c3', default='sportify_subscription'),
                 )
 
 db.define_table('monthly_income',
@@ -69,3 +73,13 @@ db.define_table('year_history',
                 Field('November', db.month_history),
                 Field('December', db.month_history),
                 )
+
+# ###### delete all records to db
+# db(db.fixed_budget.id > 0).delete()
+# db(db.changing_budget.id > 0).delete()
+#
+#
+# ######## add one or more records to db as example
+# db.fixed_budget.update_or_insert(user_id = auth.user_id)
+# db.changing_budget.update_or_insert(user_id = auth.user_id)
+

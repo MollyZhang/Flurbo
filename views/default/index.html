@@ -1,3 +1,30 @@
 {{extend 'layout.html'}}
 
+<h1>Set your budget!</h1>
 
+<div class="text-center">
+<form>
+    Your monthly income:
+    <input />
+    <input type="submit" />
+</form>
+
+
+<form>
+<h2>the budgets that are fixed over time:</h2>
+{{for category, amount in budget_categories['fixed'].iteritems():}}
+    <div>
+    <span><i class="fa fa-pencil"></i></span><span>{{=category}}</span><input " />
+    </div>
+{{pass}}
+
+<h2>the budgets that are flexible over time:</h2>
+{{for category, amount in budget_categories['changing'].iteritems():}}
+    <div>
+        <span>{{=category}}</span><input />
+    </div>
+{{pass}}
+<input type="submit" />
+</form>
+
+</div>
