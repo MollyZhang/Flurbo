@@ -1,0 +1,64 @@
+{{extend 'layout.html'}}
+
+<h1>This Week</h1>
+<div class="container">
+    <table class="table">
+        <thead>
+              <tr>
+                  <th>Budget Category</th>
+                  <th>Budget amount</th>
+                  <th>You have spent</th>
+                  <th>add a spending</th>
+              </tr>
+        </thead>
+    <tbody>
+    {{for category, amount in budget_categories['changing'].iteritems():}}
+        {{if "category" not in category: }}
+        <tr>
+            <td>{{=category}}</td>
+            <td>100</td>
+            <td>0</td>
+            <td><input /></td>
+        </tr>
+        {{pass}}
+    {{pass}}
+        <tr>
+            <td><b>Total</b></td>
+            <td><b>500</b></td>
+            <td><b>0</b></td>
+            <td><b></b></td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+
+<h1>This Month</h1>
+<div class="container">
+    <table class="table">
+        <thead>
+              <tr>
+                  <th>Budget Category</th>
+                  <th>Budget amount</th>
+                  <th>You have spent</th>
+              </tr>
+        </thead>
+    <tbody>
+        <tr>
+            <td>changing spendings</td>
+            <td>500</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>fixed spendings</td>
+            <td>1000</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td><b>Total</b></td>
+            <td><b>1500</b></td>
+            <td><b>0</b></td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+

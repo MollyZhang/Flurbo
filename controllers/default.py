@@ -6,7 +6,15 @@ def index():
     """
     start up users with initial budget catogories
     """
+    budget_categories = get_budget_categories()
+    return dict(budget_categories=budget_categories)
 
+@auth.requires_login()
+def this_week():
+    budget_categories = get_budget_categories()
+    return dict(budget_categories=budget_categories)
+
+def get_budget_categories():
     ######## save current user's budget categories as a dictionaries
     budget_categories = {"fixed":{}, "changing":{}}
     fixed_budget_categories = db(db.fixed_budget.user_id == auth.user_id).select().as_list()[0]
@@ -17,9 +25,8 @@ def index():
     keys2 = sorted(changing_budget_categories.keys())[0:-2]
     for key in keys2:
         budget_categories["changing"][changing_budget_categories[key]] = 0
+    return budget_categories
 
-
-    return dict(budget_categories=budget_categories)
 
 
 def user():
