@@ -16,7 +16,12 @@ def this_week():
 def summary():
     return dict()
 
-
+@auth.requires_login()
+@auth.requires_signature()
+def save_income():
+    db.monthly_income.update_or_insert(db.monthly_income.user_id==auth.user_id,
+        user_id=auth.user_id, amount=request.vars.income)
+    return "income inserted or udpated"
 
 
 def user():

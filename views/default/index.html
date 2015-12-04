@@ -3,17 +3,60 @@
 {{if len(categories) == 0:}}
     <div class="container">
         <h1>Initialize your budget system</h1>
-        <div class="input-group">
-            <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
-            <input class="form-control" type="password" placeholder="Password">
-        </div>
+        <div id="target_income"></div>
+
+
 
 
     </div>
 {{else: redirect(URL('default','this_week'))}}
 {{pass}}
 
+<script id="template_income" type="text/ractive">
+    <span>Your monthly income: </span>
+    {% #if editing %}
+        <input value="{% income %}" />
+        <span class="btn btn-default btn-sm" on-click='save'>Save</span>
+    {% else %}
+        <span>{% income %}</span>
+        <span class="btn btn-default btn-sm" on-click="edit">edit</span>
+    {% /if %}
 
+</script>
+
+<script>
+$(function() {
+    var INCOME = new Ractive({
+        el: '#target_income',
+        template: '#template_income',
+        delimiters: ['{%', '%}'],
+        tripleDelimiters: ['{%%', '%%}'],
+        data: {
+            editing: true,
+            income: 0
+        }
+    });
+
+    INCOME.on("save", function() {
+        INCOME.set("editing", false);
+        income = INCOME.get('income');
+        $.ajax("{{=URL('default', 'save_income', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                income: income
+                }
+            }
+        );
+    });
+
+    INCOME.on("edit", function() {
+        INCOME.set("editing", true);
+    });
+
+
+});
+</script>
 
 <!-- <a class="btn btn-primary" href=>Go to view2</a>
 
