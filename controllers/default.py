@@ -3,7 +3,10 @@
 
 @auth.requires_login()
 def index():
-    return dict()
+    rows = db(db.category.user_id == auth.user_id).select()
+    income_form = SQLFORM(db.monthly_income)
+    category_form = SQLFORM(db.category)
+    return dict(categories=rows, income_form=income_form, category_form=category_form)
 
 @auth.requires_login()
 def this_week():

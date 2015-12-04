@@ -1,11 +1,11 @@
 db.define_table('category',
-                Field('user_id', db.auth_user),
+                Field('user_id', db.auth_user, default=auth.user_id),
                 Field('name'),
                 Field('budget'),
                 )
 
 db.define_table('budget_history',
-                Field('user_id', db.auth_user),
+                Field('user_id', db.auth_user, default=auth.user_id),
                 Field('category', db.category),
                 Field('start_time'),
                 Field('end_time'),
@@ -13,7 +13,7 @@ db.define_table('budget_history',
                 )
 
 db.define_table('spending_history',
-                Field('user_id', db.auth_user),
+                Field('user_id', db.auth_user, default=auth.user_id),
                 Field('category', db.category),
                 Field('amount'),
                 Field('transaction_date'),
@@ -21,13 +21,13 @@ db.define_table('spending_history',
                 )
 
 db.define_table('monthly_income',
-                Field('user_id', db.auth_user),
+                Field('user_id', db.auth_user, default=auth.user_id),
                 Field('amount'),
                 )
 
 # fixed spending per month
 db.define_table('fixed_spending',
-                Field('user_id', db.auth_user),
+                Field('user_id', db.auth_user, default=auth.user_id),
                 Field('name'),
                 Field('amount'),
                 )

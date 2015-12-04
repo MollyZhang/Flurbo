@@ -1,6 +1,21 @@
 {{extend 'layout.html'}}
 
-<a class="btn btn-primary" href={{=URL("default", "this_week")}}>Go to view2</a>
+{{if len(categories) == 0:}}
+    <div class="container">
+        <h1>Initialize your budget system</h1>
+        <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+            <input class="form-control" type="password" placeholder="Password">
+        </div>
+
+
+    </div>
+{{else: redirect(URL('default','this_week'))}}
+{{pass}}
+
+
+
+<!-- <a class="btn btn-primary" href=>Go to view2</a>
 
 <h1>Set your budget!</h1>
 
@@ -14,19 +29,15 @@
 
 <form>
 <h2>the budgets that are fixed over time:</h2>
-{{for category, amount in budget_categories['fixed'].iteritems():}}
     <div>
-    <span><i class="fa fa-pencil"></i></span><span>{{=category}}</span><input  />
+    <span><i class="fa fa-pencil"></i></span><span></span><input  />
     </div>
-{{pass}}
 
 <h2>the budgets that are flexible over time:</h2>
-{{for category, amount in budget_categories['changing'].iteritems():}}
     <div>
-        <span>{{=category}}</span><input />
+        <span></span><input />
     </div>
-{{pass}}
 <input type="submit" />
 </form>
 
-</div>
+</div> -->
