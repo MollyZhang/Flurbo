@@ -2,20 +2,27 @@
 
 
 <div class="container">
-    <h1>Initialize your budget system</h1>
+    <div class="jumbotron">
+        <h3>Initialize your budget system</h3>
+    </div>
     <div id="target_income"></div>
     <div id="target_budget"></div>
+    <div id="target_fixed"></div>
 </div>
 
 <script id="template_income" type="text/ractive">
-    <span>Your monthly income: </span>
-    {% #if editing %}
-        <input value="{% income %}" />
-        <span class="btn btn-default btn-sm" on-click='save'>Save</span>
-    {% else %}
-        <span>{% income %}</span>
-        <span class="btn btn-default btn-sm" on-click="edit">edit</span>
-    {% /if %}
+    <div class='panel panel-success'>
+        <div class='panel-heading'>
+        <span>Your monthly income: </span>
+        {% #if editing %}
+            <input value="{% income %}" />
+            <span class="btn btn-default btn-sm" on-click='save'>Save</span>
+        {% else %}
+            <span>{% income %}</span>
+            <span class="btn btn-default btn-sm" on-click="edit">edit</span>
+        {% /if %}
+        </div>
+    </div>
 </script>
 
 <script>
@@ -49,7 +56,15 @@ $(function() {
 </script>
 
 <script id="template_budget" type="text/ractive">
-    <div class="container">
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3>Here is the budget categories that changes over time: </h3>
+            {% #if !adding_budget %}
+                <div class="btn btn-default" on-click="add-budget">add budget category</div>
+            {% else %}
+                <div class="btn btn-default" on-click="save-budget">save budget category</div>
+            {% /if %}
+        </div>
         <table class="table">
         <thead>
             <tr>
@@ -73,11 +88,6 @@ $(function() {
             {% /if %}
         </tbody>
         </table>
-        {% #if !adding_budget %}
-            <div class="btn btn-default" on-click="add-budget">add budget category</div>
-        {% else %}
-            <div class="btn btn-default" on-click="save-budget">save budget category</div>
-        {% /if %}
     </div>
 </script>
 
@@ -121,10 +131,95 @@ $(function() {
             }
         );
         BUDGET.set('adding_budget', false);
+        var new_category = {"name": name, "budget": amount};
         var updated_category = BUDGET.get('categories');
-        updated_category[name] = amount;
+        updated_category.push(new_category);
         BUDGET.set('categories', updated_category);
-        console.log(BUDGET.get('categories'));
+    });
+
+});
+</script>
+
+<script id="template_fixed" type="text/ractive">
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3>Here is the budget categories that's fixed per month: </h3>
+            {% #if !adding %}
+                <div class="btn btn-default" on-click="add">add fixed spending</div>
+            {% else %}
+                <div class="btn btn-default" on-click="save">save fixed spending</div>
+            {% /if %}
+        </div>
+        <table class="table">
+        <thead>
+            <tr>
+                <th>Fixed Spending Name</th>
+                <th>Amount Per Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% #fixed_spendings:i %}
+            <tr>
+                <td>{% fixed_spendings[i]['name'] %}</td>
+                <td>{% fixed_spendings[i]['amount'] %}</td>
+            </tr>
+            {% /fixed_spendings %}
+
+            {% #if adding %}
+            <tr>
+                <td><input placeholder="new fixed spending" id="spending_name" /></td>
+                <td><input placeholder="0" id="spending_amount" /></td>
+            </tr>
+            {% /if %}
+        </tbody>
+        </table>
+    </div>
+</script>
+
+<script>
+$(function() {
+    var FIXED = new Ractive({
+        el: '#target_fixed',
+        template: '#template_fixed',
+        delimiters: ['{%', '%}'],
+        tripleDelimiters: ['{%%', '%%}'],
+        data: {
+            adding: false,
+            fixed_spendings: []
+        }
+    });
+
+    //load initial set of budget categories
+    $.ajax("{{=URL('default', 'load_fixed_spendings', user_signature=True)}}",
+        {
+        method: 'POST',
+        success: function (data) {
+            FIXED.set('fixed_spendings', data['fixed_spendings']);
+            }
+        }
+  );
+
+    FIXED.on('add', function(){
+        FIXED.set('adding', true);
+    });
+
+    FIXED.on('save', function(){
+        var name = $('#spending_name').val();
+        var amount = $('#spending_amount').val();
+        $.ajax("{{=URL('default', 'save_fixed_spending', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                name: name,
+                amount: amount
+                }
+            }
+        );
+        FIXED.set('adding', false);
+        var new_spending = {"name": name, "amount": amount};
+        var updated_spending = FIXED.get('fixed_spendings');
+        updated_spending.push(new_spending);
+        FIXED.set('fixed_spendings', updated_spending);
     });
 
 });

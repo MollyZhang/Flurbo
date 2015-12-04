@@ -8,11 +8,12 @@ def index():
 @auth.requires_signature()
 def load_budget_categories():
     rows = db(db.category.user_id == auth.user_id).select().as_list()
-    print rows
-    # categories = {}
-    # for r in rows:
-    #     categories[r.name] = r.budget
     return response.json(dict(categories=rows))
+
+@auth.requires_signature()
+def load_fixed_spendings():
+    rows = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
+    return response.json(dict(fixed_spendings=rows))
 
 
 @auth.requires_login()
@@ -32,11 +33,23 @@ def save_income():
 
 @auth.requires_login()
 @auth.requires_signature()
+def save_fixed_spending():
+    db.fixed_spending.update_or_insert(
+        (db.fixed_spending.user_id==auth.user_id)&(db.fixed_spending.name==request.vars.name),
+        user_id=auth.user_id, name=request.vars.name, amount=request.vars.amount)
+    return "ok"
+
+
+
+@auth.requires_login()
+@auth.requires_signature()
 def save_budget():
     db.category.update_or_insert(
         (db.category.user_id==auth.user_id)&(db.category.name==request.vars.name),
         user_id=auth.user_id, name=request.vars.name, budget=request.vars.amount)
     return "ok"
+
+
 
 
 
