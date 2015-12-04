@@ -1,14 +1,11 @@
 {{extend 'layout.html'}}
 
 
-{{if len(categories) == 0:}}
-    <div class="container">
-        <h1>Initialize your budget system</h1>
-        <div id="target_income"></div>
-        <div id="target_budget"></div>
-    </div>
-{{else: redirect(URL('default','this_week'))}}
-{{pass}}
+<div class="container">
+    <h1>Initialize your budget system</h1>
+    <div id="target_income"></div>
+    <div id="target_budget"></div>
+</div>
 
 <script id="template_income" type="text/ractive">
     <span>Your monthly income: </span>
@@ -57,20 +54,30 @@ $(function() {
         <thead>
             <tr>
                 <th>Budget Category</th>
-                <th>Budget amount</th>
+                <th>Budget Per Week</th>
             </tr>
         </thead>
         <tbody>
+            {% #categories %}
             <tr>
-                {% #test %}
-                <td>{% a %}</td>
-                <td>{% b %}</td>
-                <td>{% c %}</td>
-                {% /test %}
+                <td>key</td>
+                <td>value</td>
             </tr>
+            {% /categories %}
+
+            {% #if adding_budget %}
+            <tr>
+                <td><input placeholder="new budget category" id="category_name" /></td>
+                <td><input placeholder="0" id="category_budget" /></td>
+            </tr>
+            {% /if %}
         </tbody>
         </table>
-        <div class="btn btn-default" on-click="add-budget">add budget category</div>
+        {% #if !adding_budget %}
+            <div class="btn btn-default" on-click="add-budget">add budget category</div>
+        {% else %}
+            <div class="btn btn-default" on-click="save-budget">save budget category</div>
+        {% /if %}
     </div>
 </script>
 
@@ -82,36 +89,44 @@ $(function() {
         delimiters: ['{%', '%}'],
         tripleDelimiters: ['{%%', '%%}'],
         data: {
-            categories: {{=categories}},
+            adding_budget: false,
+            categories: {}
         }
     });
+
+    //load initial set of budget categories
+    $.ajax("{{=URL('default', 'load_budget_categories', user_signature=True)}}",
+        {
+        method: 'POST',
+        success: function (data) {
+            BUDGET.set('categories', data['categories']);
+            console.log(BUDGET.get('categories'));
+            }
+        }
+  );
+
+    BUDGET.on('add-budget', function(){
+        BUDGET.set('adding_budget', true);
+    });
+
+    BUDGET.on('save-budget', function(){
+        var name = $('#category_name').val();
+        var amount = $('#category_budget').val();
+        $.ajax("{{=URL('default', 'save_budget', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                name: name,
+                amount: amount
+                }
+            }
+        );
+        BUDGET.set('adding_budget', false);
+        var updated_category = BUDGET.get('categories');
+        updated_category[name] = amount;
+        BUDGET.set('categories', updated_category);
+        console.log(BUDGET.get('categories'));
+    });
+
 });
 </script>
-
-
-<!-- <a class="btn btn-primary" href=>Go to view2</a>
-
-<h1>Set your budget!</h1>
-
-<div class="text-center">
-<form>
-    Your monthly income:
-    <input />
-    <input type="submit" />
-</form>
-
-
-<form>
-<h2>the budgets that are fixed over time:</h2>
-    <div>
-    <span><i class="fa fa-pencil"></i></span><span></span><input  />
-    </div>
-
-<h2>the budgets that are flexible over time:</h2>
-    <div>
-        <span></span><input />
-    </div>
-<input type="submit" />
-</form>
-
-</div> -->

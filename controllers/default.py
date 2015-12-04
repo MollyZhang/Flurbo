@@ -3,11 +3,16 @@
 
 @auth.requires_login()
 def index():
+    return dict()
+
+@auth.requires_signature()
+def load_budget_categories():
     rows = db(db.category.user_id == auth.user_id).select()
     categories = {}
     for r in rows:
         categories[r.name] = r.budget
-    return dict(categories=categories)
+    return response.json(dict(categories=categories))
+
 
 @auth.requires_login()
 def this_week():
@@ -22,7 +27,16 @@ def summary():
 def save_income():
     db.monthly_income.update_or_insert(db.monthly_income.user_id==auth.user_id,
         user_id=auth.user_id, amount=request.vars.income)
-    return "income inserted or udpated"
+    return "ok"
+
+@auth.requires_login()
+@auth.requires_signature()
+def save_budget():
+    db.category.update_or_insert(
+        (db.category.user_id==auth.user_id)&(db.category.name==request.vars.name),
+        user_id=auth.user_id, name=request.vars.name, budget=request.vars.amount)
+    return "ok"
+
 
 
 def user():
