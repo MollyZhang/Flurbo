@@ -7,11 +7,12 @@ def index():
 
 @auth.requires_signature()
 def load_budget_categories():
-    rows = db(db.category.user_id == auth.user_id).select()
-    categories = {}
-    for r in rows:
-        categories[r.name] = r.budget
-    return response.json(dict(categories=categories))
+    rows = db(db.category.user_id == auth.user_id).select().as_list()
+    print rows
+    # categories = {}
+    # for r in rows:
+    #     categories[r.name] = r.budget
+    return response.json(dict(categories=rows))
 
 
 @auth.requires_login()

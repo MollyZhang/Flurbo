@@ -58,10 +58,10 @@ $(function() {
             </tr>
         </thead>
         <tbody>
-            {% #categories %}
+            {% #categories:i %}
             <tr>
-                <td>key</td>
-                <td>value</td>
+                <td>{% categories[i]['name'] %}</td>
+                <td>{% categories[i]['budget'] %}</td>
             </tr>
             {% /categories %}
 
@@ -90,7 +90,7 @@ $(function() {
         tripleDelimiters: ['{%%', '%%}'],
         data: {
             adding_budget: false,
-            categories: {}
+            categories: []
         }
     });
 
@@ -100,7 +100,6 @@ $(function() {
         method: 'POST',
         success: function (data) {
             BUDGET.set('categories', data['categories']);
-            console.log(BUDGET.get('categories'));
             }
         }
   );
