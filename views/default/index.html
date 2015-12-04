@@ -1,7 +1,8 @@
 {{extend 'layout.html'}}
 
-<h1>Set your budget!</h1>
 <a class="btn btn-primary" href={{=URL("default", "this_week")}}>Go to view2</a>
+
+<h1>Set your budget!</h1>
 
 <div class="text-center">
 <form>
@@ -15,7 +16,7 @@
 <h2>the budgets that are fixed over time:</h2>
 {{for category, amount in budget_categories['fixed'].iteritems():}}
     <div>
-    <span><i class="fa fa-pencil"></i></span><span>{{=category}}</span><input " />
+    <span><i class="fa fa-pencil"></i></span><span>{{=category}}</span><input  />
     </div>
 {{pass}}
 
