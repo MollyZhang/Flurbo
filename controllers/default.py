@@ -5,15 +5,12 @@
 def index():
     return dict()
 
+@auth.requires_login()
 @auth.requires_signature()
-def load_budget_categories():
-    rows = db(db.category.user_id == auth.user_id).select().as_list()
-    return response.json(dict(categories=rows))
-
-@auth.requires_signature()
-def load_fixed_spendings():
-    rows = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
-    return response.json(dict(fixed_spendings=rows))
+def load_data():
+    budgets = db(db.category.user_id == auth.user_id).select().as_list()
+    fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
+    return response.json(dict(categories=budgets, fixed_spendings=fixed_spendings))
 
 
 @auth.requires_login()

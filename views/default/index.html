@@ -1,61 +1,26 @@
 {{extend 'layout.html'}}
-
-
+        
 <div class="container">
     <div class="jumbotron">
         <h3>Initialize your budget system</h3>
     </div>
-    <div id="target_income"></div>
-    <div id="target_budget"></div>
-    <div id="target_fixed"></div>
+    <div id="target"></div>
 </div>
 
-<script id="template_income" type="text/ractive">
+<script id="template" type="text/ractive">
     <div class='panel panel-success'>
         <div class='panel-heading'>
         <span>Your monthly income: </span>
-        {% #if editing %}
+        {% #if adding_income %}
             <input value="{% income %}" />
-            <span class="btn btn-default btn-sm" on-click='save'>Save</span>
+            <span class="btn btn-default btn-sm" on-click='save_income'>Save</span>
         {% else %}
             <span>{% income %}</span>
-            <span class="btn btn-default btn-sm" on-click="edit">edit</span>
+            <span class="btn btn-default btn-sm" on-click="edit_income">edit</span>
         {% /if %}
         </div>
     </div>
-</script>
 
-<script>
-$(function() {
-    var INCOME = new Ractive({
-        el: '#target_income',
-        template: '#template_income',
-        delimiters: ['{%', '%}'],
-        tripleDelimiters: ['{%%', '%%}'],
-        data: {
-            editing: true,
-            income: 0
-        }
-    });
-    INCOME.on("save", function() {
-        INCOME.set("editing", false);
-        income = INCOME.get('income');
-        $.ajax("{{=URL('default', 'save_income', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                income: income
-                }
-            }
-        );
-    });
-    INCOME.on("edit", function() {
-        INCOME.set("editing", true);
-    });
-});
-</script>
-
-<script id="template_budget" type="text/ractive">
     <div class="panel panel-success">
         <div class="panel-heading">
             <h3>Here is the budget categories that changes over time: </h3>
@@ -89,65 +54,14 @@ $(function() {
         </tbody>
         </table>
     </div>
-</script>
 
-<script>
-$(function() {
-    var BUDGET = new Ractive({
-        el: '#target_budget',
-        template: '#template_budget',
-        delimiters: ['{%', '%}'],
-        tripleDelimiters: ['{%%', '%%}'],
-        data: {
-            adding_budget: false,
-            categories: []
-        }
-    });
-
-    //load initial set of budget categories
-    $.ajax("{{=URL('default', 'load_budget_categories', user_signature=True)}}",
-        {
-        method: 'POST',
-        success: function (data) {
-            BUDGET.set('categories', data['categories']);
-            }
-        }
-  );
-
-    BUDGET.on('add-budget', function(){
-        BUDGET.set('adding_budget', true);
-    });
-
-    BUDGET.on('save-budget', function(){
-        var name = $('#category_name').val();
-        var amount = $('#category_budget').val();
-        $.ajax("{{=URL('default', 'save_budget', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                name: name,
-                amount: amount
-                }
-            }
-        );
-        BUDGET.set('adding_budget', false);
-        var new_category = {"name": name, "budget": amount};
-        var updated_category = BUDGET.get('categories');
-        updated_category.push(new_category);
-        BUDGET.set('categories', updated_category);
-    });
-
-});
-</script>
-
-<script id="template_fixed" type="text/ractive">
     <div class="panel panel-success">
         <div class="panel-heading">
             <h3>Here is the budget categories that's fixed per month: </h3>
-            {% #if !adding %}
-                <div class="btn btn-default" on-click="add">add fixed spending</div>
+            {% #if !adding_fixed %}
+                <div class="btn btn-default" on-click="add_fixed">add fixed spending</div>
             {% else %}
-                <div class="btn btn-default" on-click="save">save fixed spending</div>
+                <div class="btn btn-default" on-click="save_fixed">save fixed spending</div>
             {% /if %}
         </div>
         <table class="table">
@@ -165,7 +79,7 @@ $(function() {
             </tr>
             {% /fixed_spendings %}
 
-            {% #if adding %}
+            {% #if adding_fixed %}
             <tr>
                 <td><input placeholder="new fixed spending" id="spending_name" /></td>
                 <td><input placeholder="0" id="spending_amount" /></td>
@@ -174,36 +88,81 @@ $(function() {
         </tbody>
         </table>
     </div>
+
 </script>
 
 <script>
 $(function() {
-    var FIXED = new Ractive({
-        el: '#target_fixed',
-        template: '#template_fixed',
+    var MAIN = new Ractive({
+        el: '#target',
+        template: '#template',
         delimiters: ['{%', '%}'],
         tripleDelimiters: ['{%%', '%%}'],
         data: {
-            adding: false,
+            adding_income: true,
+            adding_budget: false,
+            adding_fixed: false,
+            income: 0,
+            categories: [],
             fixed_spendings: []
         }
     });
 
-    //load initial set of budget categories
-    $.ajax("{{=URL('default', 'load_fixed_spendings', user_signature=True)}}",
+    $.ajax("{{=URL('default', 'load_data', user_signature=True)}}",
         {
         method: 'POST',
         success: function (data) {
-            FIXED.set('fixed_spendings', data['fixed_spendings']);
+            MAIN.set('categories', data['categories']);
+            MAIN.set('fixed_spendings', data['fixed_spendings']);
             }
         }
   );
 
-    FIXED.on('add', function(){
-        FIXED.set('adding', true);
+    MAIN.on('add-budget', function(){
+        MAIN.set('adding_budget', true);
     });
 
-    FIXED.on('save', function(){
+    MAIN.on('save-budget', function(){
+        var name = $('#category_name').val();
+        var amount = $('#category_budget').val();
+        $.ajax("{{=URL('default', 'save_budget', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                name: name,
+                amount: amount
+                }
+            }
+        );
+        MAIN.set('adding_budget', false);
+        var new_category = {"name": name, "budget": amount};
+        var updated_category = MAIN.get('categories');
+        updated_category.push(new_category);
+        MAIN.set('categories', updated_category);
+    });
+
+    MAIN.on("save_income", function() {
+        MAIN.set("adding_income", false);
+        income = MAIN.get('income');
+        $.ajax("{{=URL('default', 'save_income', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                income: income
+                }
+            }
+        );
+    });
+    MAIN.on("edit_income", function() {
+        MAIN.set("adding_income", true);
+    });
+
+
+    MAIN.on('add_fixed', function(){
+        MAIN.set('adding_fixed', true);
+    });
+
+    MAIN.on('save_fixed', function(){
         var name = $('#spending_name').val();
         var amount = $('#spending_amount').val();
         $.ajax("{{=URL('default', 'save_fixed_spending', user_signature=True)}}",
@@ -215,12 +174,11 @@ $(function() {
                 }
             }
         );
-        FIXED.set('adding', false);
+        MAIN.set('adding_fixed', false);
         var new_spending = {"name": name, "amount": amount};
-        var updated_spending = FIXED.get('fixed_spendings');
+        var updated_spending = MAIN.get('fixed_spendings');
         updated_spending.push(new_spending);
-        FIXED.set('fixed_spendings', updated_spending);
+        MAIN.set('fixed_spendings', updated_spending);
     });
-
 });
 </script>
