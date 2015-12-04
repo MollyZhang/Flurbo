@@ -1,13 +1,11 @@
 {{extend 'layout.html'}}
 
+
 {{if len(categories) == 0:}}
     <div class="container">
         <h1>Initialize your budget system</h1>
         <div id="target_income"></div>
-
-
-
-
+        <div id="target_budget"></div>
     </div>
 {{else: redirect(URL('default','this_week'))}}
 {{pass}}
@@ -21,7 +19,6 @@
         <span>{% income %}</span>
         <span class="btn btn-default btn-sm" on-click="edit">edit</span>
     {% /if %}
-
 </script>
 
 <script>
@@ -36,7 +33,6 @@ $(function() {
             income: 0
         }
     });
-
     INCOME.on("save", function() {
         INCOME.set("editing", false);
         income = INCOME.get('income');
@@ -49,14 +45,49 @@ $(function() {
             }
         );
     });
-
     INCOME.on("edit", function() {
         INCOME.set("editing", true);
     });
-
-
 });
 </script>
+
+<script id="template_budget" type="text/ractive">
+    <div class="container">
+        <table class="table">
+        <thead>
+            <tr>
+                <th>Budget Category</th>
+                <th>Budget amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% #test %}
+                <td>{% a %}</td>
+                <td>{% b %}</td>
+                <td>{% c %}</td>
+                {% /test %}
+            </tr>
+        </tbody>
+        </table>
+        <div class="btn btn-default" on-click="add-budget">add budget category</div>
+    </div>
+</script>
+
+<script>
+$(function() {
+    var BUDGET = new Ractive({
+        el: '#target_budget',
+        template: '#template_budget',
+        delimiters: ['{%', '%}'],
+        tripleDelimiters: ['{%%', '%%}'],
+        data: {
+            categories: {{=categories}},
+        }
+    });
+});
+</script>
+
 
 <!-- <a class="btn btn-primary" href=>Go to view2</a>
 
