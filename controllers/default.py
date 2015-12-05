@@ -47,8 +47,16 @@ def save_budget():
     return "ok"
 
 
+############## this part handles all the deletions ###########
+@auth.requires_signature()
+def delete_budget_category():
+    db(db.category.id == request.vars.category_id).delete()
+    return "ok"
 
-
+@auth.requires_signature()
+def delete_fixed_spending():
+    db(db.fixed_spending.id == request.vars.fixed_id).delete()
+    return "ok"
 
 def user():
     """

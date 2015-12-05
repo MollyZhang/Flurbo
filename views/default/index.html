@@ -50,8 +50,10 @@
                         <td>{% categories[i]['name'] %}</td>
                         <td>{% categories[i]['budget'] %}</td>
                         <td>
-                            <i class="btn btn-default btn-sm fa fa-pencil" on-click="something"></i>
-                            <i class="btn btn-default btn-sm fa fa-trash" on-click="something"></i>
+                            <i class="btn btn-default btn-sm fa fa-pencil" 
+                                on-click="something"></i>
+                            <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash"
+                                on-click="delete_budget"></i>
                         </td>
                     </tr>
                     {% /categories %}
@@ -95,7 +97,8 @@
                         <td>{% fixed_spendings[i]['amount'] %}</td>
                         <td>
                             <i class="btn btn-default btn-sm fa fa-pencil" on-click="something"></i>
-                            <i class="btn btn-default btn-sm fa fa-trash" on-click="something"></i>
+                            <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash" 
+                                on-click="delete_fixed"></i>
                         </td>
 
                     </tr>
@@ -216,5 +219,40 @@ $(function() {
         updated_spending.push(new_spending);
         MAIN.set('fixed_spendings', updated_spending);
     });
+
+    MAIN.on("delete_budget", function(e) {
+        var index = $(e.original.target).data('index');
+        categories = MAIN.get('categories');
+        target_category = categories[index];
+        console.log(target_category);
+        $.ajax("{{=URL('default', 'delete_budget_category', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                category_id: target_category['id']
+                }
+            }
+        );
+        categories.splice(index,1);
+        MAIN.set('categories', categories);
+    });
+
+    MAIN.on("delete_fixed", function(e) {
+        var index = $(e.original.target).data('index');
+        fixed = MAIN.get('fixed_spendings');
+        target_fixed = fixed[index];
+        $.ajax("{{=URL('default', 'delete_fixed_spending', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                fixed_id: target_fixed['id']
+                }
+            }
+        );
+        fixed.splice(index,1);
+        MAIN.set('fixed_spendings', fixed);
+    });
+
+
 });
 </script>
