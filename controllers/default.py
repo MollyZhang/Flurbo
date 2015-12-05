@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 
 @auth.requires_login()
 def index():
@@ -63,6 +64,16 @@ def save_budget():
         user_id=auth.user_id, name=request.vars.name, budget=request.vars.amount)
     return "ok"
 
+
+@auth.requires_login()
+@auth.requires_signature()
+def save_spending_history():
+    db.spending_history.insert(user_id=auth.user_id,
+                               category=request.vars.category_id,
+                               amount=request.vars.amount,
+                               time_stamp=datetime.now()
+                               )
+    return "ok"
 
 ############## this part handles all the deletions ###########
 @auth.requires_signature()

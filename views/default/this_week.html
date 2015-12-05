@@ -22,8 +22,10 @@
                         <td>{% categories[i]['name'] %}</td>
                         <td>{% categories[i]['budget'] %}</td>
                         <td>placeholder</td>
-                        <td><input /></td>
-                        <td>save button</td>
+                        <td><input id="spending_{% i %}"/></td>
+                        <td><span class="btn btn-success btn-sm"
+                            data-index="{% i %}"
+                            on-click="add-spending">Add</span></td>
                     </tr>
                     {% /categories %}
                 </tbody>
@@ -54,5 +56,25 @@ $(function() {
             }
         }
     );
+
+    MAIN.on('add-spending', function(e) {
+        var index = $(e.original.target).data('index');
+        var amount = $('#spending_' + index).val();
+        var category_id = MAIN.get('categories')[index]['id'];
+        console.log(index, amount, category_id);
+        $.ajax("{{=URL('default', 'save_spending_history', user_signature=True)}}",
+            {
+            method: 'POST',
+            data: {
+                category_id: category_id,
+                amount: amount
+            },
+            success: function (data) {
+                console.log("successful");
+                }
+            }
+        );
+    });
+
 });
 </script>

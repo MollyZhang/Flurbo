@@ -1,3 +1,5 @@
+from datetime import datetime
+
 db.define_table('category',
                 Field('user_id', db.auth_user, default=auth.user_id),
                 Field('name'),
@@ -16,8 +18,7 @@ db.define_table('spending_history',
                 Field('user_id', db.auth_user, default=auth.user_id),
                 Field('category', db.category),
                 Field('amount'),
-                Field('transaction_date'),
-                Field('note')
+                Field('time_stamp','datetime')
                 )
 
 db.define_table('monthly_income',
