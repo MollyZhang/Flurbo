@@ -1,63 +1,58 @@
 {{extend 'layout.html'}}
 
-<!-- <a class="btn btn-primary" >Go to view3</a>
-<h1>This Week</h1>
-<div class="container">
-    <table class="table">
-        <thead>
-              <tr>
-                  <th>Budget Category</th>
-                  <th>Budget amount</th>
-                  <th>You have spent</th>
-                  <th>add a spending</th>
-              </tr>
-        </thead>
-    <tbody> 
+<div id="target"></div>
 
-        <tr>
-            <td></td>
-            <td>100</td>
-            <td>0</td>
-            <td><input /></td>
-        </tr>
+<script id="template" type="text/ractive">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                <thead>
+                    <tr>
+                        <th>Budget Category</th>
+                        <th>Budget Per Week</th>
+                        <th>You have spent</th>
+                        <th>Add spending</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% #categories:i %}
+                    <tr>
+                        <td>{% categories[i]['name'] %}</td>
+                        <td>{% categories[i]['budget'] %}</td>
+                        <td>placeholder</td>
+                        <td><input /></td>
+                        <td>save button</td>
+                    </tr>
+                    {% /categories %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-        <tr>
-            <td><b>Total</b></td>
-            <td><b>500</b></td>
-            <td><b>0</b></td>
-            <td><b></b></td>
-        </tr>
-    </tbody>
-  </table>
-</div>
+</script>
 
-<h1>This Month</h1>
-<div class="container">
-    <table class="table">
-        <thead>
-              <tr>
-                  <th>Budget Category</th>
-                  <th>Budget amount</th>
-                  <th>You have spent</th>
-              </tr>
-        </thead>
-    <tbody>
-        <tr>
-            <td>changing spendings</td>
-            <td>500</td>
-            <td>0</td>
-        </tr>
-        <tr>
-            <td>fixed spendings</td>
-            <td>1000</td>
-            <td>0</td>
-        </tr>
-        <tr>
-            <td><b>Total</b></td>
-            <td><b>1500</b></td>
-            <td><b>0</b></td>
-        </tr>
-    </tbody>
-  </table>
-</div> -->
+<script>
+$(function() {
+    var MAIN = new Ractive({
+        el: '#target',
+        template: '#template',
+        delimiters: ['{%', '%}'],
+        tripleDelimiters: ['{%%', '%%}'],
+        data: {
+            categories: [],
+        }
+    });
 
+    $.ajax("{{=URL('default', 'load_data', user_signature=True)}}",
+        {
+        method: 'POST',
+        success: function (data) {
+            MAIN.set('categories', data['categories']);
+            }
+        }
+    );
+});
+</script>
