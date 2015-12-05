@@ -1,92 +1,127 @@
 {{extend 'layout.html'}}
-        
+
 <div class="container">
     <div class="jumbotron">
-        <h3>Initialize your budget system</h3>
+        <h1>Initialize your budget system</h1>
+        <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
+        <p class="btn btn-warning btn-lg">Add Income</p>
+        <p class="btn btn-info btn-lg">Add Budget</p>
     </div>
     <div id="target"></div>
 </div>
 
 <script id="template" type="text/ractive">
-    <div class='panel panel-success'>
-        <div class='panel-heading'>
-        <span>Your monthly income: </span>
-        {% #if adding_income %}
-            <input value="{% income %}" />
-            <span class="btn btn-default btn-sm" on-click='save_income'>Save</span>
-        {% else %}
-            <span>{% income %}</span>
-            <span class="btn btn-default btn-sm" on-click="edit_income">edit</span>
-        {% /if %}
+    <div class="row"> 
+        <div class="col-md-12">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                <span>Your monthly income: </span>
+                {% #if adding_income %}
+                    <input value="{% income %}" />
+                    <span class="btn btn-default btn-sm" on-click='save_income'>Save</span>
+                {% else %}
+                    <span>{% income %}</span>
+                    <span class="btn btn-default btn-sm" on-click="edit_income">edit</span>
+                {% /if %}
+
+                <div>Your total monthly budget: </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h3>Here is the budget categories that changes over time: </h3>
-            {% #if !adding_budget %}
-                <div class="btn btn-default" on-click="add-budget">add budget category</div>
-            {% else %}
-                <div class="btn btn-default" on-click="save-budget">save budget category</div>
-            {% /if %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3>Budgets that changes over time: </h3>
+                </div>
+                <table class="table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Budget Per Week</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% #categories:i %}
+                    <tr>
+                        <td>{% categories[i]['name'] %}</td>
+                        <td>{% categories[i]['budget'] %}</td>
+                        <td>
+                            <i class="btn btn-default btn-sm fa fa-pencil" on-click="something"></i>
+                            <i class="btn btn-default btn-sm fa fa-trash" on-click="something"></i>
+                        </td>
+                    </tr>
+                    {% /categories %}
+
+                    {% #if adding_budget %}
+                    <tr>
+                        <td><input placeholder="new budget category" id="category_name" /></td>
+                        <td><input placeholder="0" id="category_budget" /></td>
+                    </tr>
+                    {% /if %}
+                </tbody>
+                </table>
+                <div class="panel-footer">
+                    {% #if !adding_budget %}
+                        <div class="btn btn-info btn-lg" on-click="add-budget">
+                        <i class="fa fa-plus"></i></div>
+                    {% else %}
+                        <div class="btn btn-info btn-lg" on-click="save-budget">
+                        <i class="fa fa-floppy-o"></i></div>
+                    {% /if %}
+                </div>
+            </div>
         </div>
-        <table class="table">
-        <thead>
-            <tr>
-                <th>Budget Category</th>
-                <th>Budget Per Week</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% #categories:i %}
-            <tr>
-                <td>{% categories[i]['name'] %}</td>
-                <td>{% categories[i]['budget'] %}</td>
-            </tr>
-            {% /categories %}
 
-            {% #if adding_budget %}
-            <tr>
-                <td><input placeholder="new budget category" id="category_name" /></td>
-                <td><input placeholder="0" id="category_budget" /></td>
-            </tr>
-            {% /if %}
-        </tbody>
-        </table>
-    </div>
+        <div class="col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3>Budgets fixed per month: </h3>
+                </div>
+                <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount Per Month</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% #fixed_spendings:i %}
+                    <tr>
+                        <td>{% fixed_spendings[i]['name'] %}</td>
+                        <td>{% fixed_spendings[i]['amount'] %}</td>
+                        <td>
+                            <i class="btn btn-default btn-sm fa fa-pencil" on-click="something"></i>
+                            <i class="btn btn-default btn-sm fa fa-trash" on-click="something"></i>
+                        </td>
 
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h3>Here is the budget categories that's fixed per month: </h3>
-            {% #if !adding_fixed %}
-                <div class="btn btn-default" on-click="add_fixed">add fixed spending</div>
-            {% else %}
-                <div class="btn btn-default" on-click="save_fixed">save fixed spending</div>
-            {% /if %}
+                    </tr>
+                    {% /fixed_spendings %}
+
+                    {% #if adding_fixed %}
+                    <tr>
+                        <td><input placeholder="new fixed spending" id="spending_name" /></td>
+                        <td><input placeholder="0" id="spending_amount" /></td>
+                    </tr>
+                    {% /if %}
+                </tbody>
+                </table>
+                <div class="panel-footer">
+                    {% #if !adding_fixed %}
+                        <div class="btn btn-info btn-lg" on-click="add_fixed">
+                        <i class="fa fa-plus"></i>
+                        </div>
+                    {% else %}
+                        <div class="btn btn-info btn-lg" on-click="save_fixed">
+                        <i class="fa fa-floppy-o"></i>
+                        </div>
+                    {% /if %}
+                </div>
+            </div>
         </div>
-        <table class="table">
-        <thead>
-            <tr>
-                <th>Fixed Spending Name</th>
-                <th>Amount Per Month</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% #fixed_spendings:i %}
-            <tr>
-                <td>{% fixed_spendings[i]['name'] %}</td>
-                <td>{% fixed_spendings[i]['amount'] %}</td>
-            </tr>
-            {% /fixed_spendings %}
-
-            {% #if adding_fixed %}
-            <tr>
-                <td><input placeholder="new fixed spending" id="spending_name" /></td>
-                <td><input placeholder="0" id="spending_amount" /></td>
-            </tr>
-            {% /if %}
-        </tbody>
-        </table>
     </div>
 
 </script>
@@ -104,7 +139,8 @@ $(function() {
             adding_fixed: false,
             income: 0,
             categories: [],
-            fixed_spendings: []
+            fixed_spendings: [],
+            total:0
         }
     });
 
