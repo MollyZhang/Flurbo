@@ -10,7 +10,10 @@ def index():
 def load_data():
     budgets = db(db.category.user_id == auth.user_id).select().as_list()
     fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
-    return response.json(dict(categories=budgets, fixed_spendings=fixed_spendings))
+    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
+    return response.json(dict(categories=budgets,
+                              fixed_spendings=fixed_spendings,
+                              income=income))
 
 
 @auth.requires_login()
@@ -21,6 +24,9 @@ def this_week():
 def summary():
     return dict()
 
+
+
+######### this part handle all the savings to database
 @auth.requires_login()
 @auth.requires_signature()
 def save_income():

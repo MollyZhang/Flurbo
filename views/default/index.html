@@ -18,13 +18,13 @@
                 <span>Your monthly income: </span>
                 {% #if adding_income %}
                     <input value="{% income %}" />
-                    <span class="btn btn-default btn-sm" on-click='save_income'>Save</span>
+                    <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
                 {% else %}
                     <span>{% income %}</span>
-                    <span class="btn btn-default btn-sm" on-click="edit_income">edit</span>
+                    <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
                 {% /if %}
 
-                <div>Your total monthly budget: </div>
+                <div>Your total monthly budget: {% total %}</div>
                 </div>
             </div>
         </div>
@@ -50,8 +50,6 @@
                         <td>{% categories[i]['name'] %}</td>
                         <td>{% categories[i]['budget'] %}</td>
                         <td>
-                            <i class="btn btn-default btn-sm fa fa-pencil" 
-                                on-click="something"></i>
                             <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash"
                                 on-click="delete_budget"></i>
                         </td>
@@ -96,7 +94,6 @@
                         <td>{% fixed_spendings[i]['name'] %}</td>
                         <td>{% fixed_spendings[i]['amount'] %}</td>
                         <td>
-                            <i class="btn btn-default btn-sm fa fa-pencil" on-click="something"></i>
                             <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash" 
                                 on-click="delete_fixed"></i>
                         </td>
@@ -137,13 +134,13 @@ $(function() {
         delimiters: ['{%', '%}'],
         tripleDelimiters: ['{%%', '%%}'],
         data: {
-            adding_income: true,
+            adding_income: false,
             adding_budget: false,
             adding_fixed: false,
             income: 0,
             categories: [],
             fixed_spendings: [],
-            total:0
+            total: 0
         }
     });
 
@@ -153,9 +150,24 @@ $(function() {
         success: function (data) {
             MAIN.set('categories', data['categories']);
             MAIN.set('fixed_spendings', data['fixed_spendings']);
+            MAIN.set('income', data['income'][0]['amount']);
+            MAIN.set('total', calculate_total_budget());
             }
         }
   );
+
+    function calculate_total_budget() {
+        var total = 0;
+        fixed = MAIN.get('fixed_spendings');
+        budgets = MAIN.get('categories');
+        for (i=0; i<fixed.length; ++i) {
+            total += parseInt(fixed[i]['amount'])
+        }
+        for (i=0; i<budgets.length; ++i) {
+            total += parseInt(budgets[i]['budget'])* 30 / 7
+        }
+        return Math.round(total);
+    }
 
     MAIN.on('add-budget', function(){
         MAIN.set('adding_budget', true);
@@ -178,6 +190,8 @@ $(function() {
         var updated_category = MAIN.get('categories');
         updated_category.push(new_category);
         MAIN.set('categories', updated_category);
+        MAIN.set('total', calculate_total_budget());
+
     });
 
     MAIN.on("save_income", function() {
@@ -218,6 +232,8 @@ $(function() {
         var updated_spending = MAIN.get('fixed_spendings');
         updated_spending.push(new_spending);
         MAIN.set('fixed_spendings', updated_spending);
+        MAIN.set('total', calculate_total_budget());
+
     });
 
     MAIN.on("delete_budget", function(e) {
@@ -235,6 +251,8 @@ $(function() {
         );
         categories.splice(index,1);
         MAIN.set('categories', categories);
+        MAIN.set('total', calculate_total_budget());
+
     });
 
     MAIN.on("delete_fixed", function(e) {
@@ -251,6 +269,7 @@ $(function() {
         );
         fixed.splice(index,1);
         MAIN.set('fixed_spendings', fixed);
+        MAIN.set('total', calculate_total_budget());
     });
 
 
