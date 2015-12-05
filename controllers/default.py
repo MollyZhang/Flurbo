@@ -3,7 +3,14 @@
 
 @auth.requires_login()
 def index():
-    return dict()
+    # find out if it's a new uninitialized user
+    user_status = db(db.initialization.user_id == auth.user_id).select().first()
+    if user_status is None:
+        db.initialization.insert(user_id=auth.user_id, initialized=False)
+        init = False
+    else:
+        init = user_status.initialized
+    return dict(init=init)
 
 @auth.requires_login()
 @auth.requires_signature()
@@ -14,7 +21,6 @@ def load_data():
     return response.json(dict(categories=budgets,
                               fixed_spendings=fixed_spendings,
                               income=income))
-
 
 @auth.requires_login()
 def this_week():
@@ -42,6 +48,11 @@ def save_fixed_spending():
         user_id=auth.user_id, name=request.vars.name, amount=request.vars.amount)
     return "ok"
 
+@auth.requires_signature()
+@auth.requires_login()
+def save_init():
+    db(db.initialization.user_id==auth.user_id).update(initialized=True)
+    return "ok"
 
 
 @auth.requires_login()

@@ -32,6 +32,14 @@ db.define_table('fixed_spending',
                 Field('amount'),
                 )
 
+# keep track of new users and old users.
+db.define_table('initialization',
+                Field('user_id', db.auth_user),
+                Field('initialized', 'boolean', default="False")
+                )
+
+
+
 ###### delete all records to db
 # db(db.fixed_budget.id > 0).delete()
 # db(db.changing_budget.id > 0).delete()

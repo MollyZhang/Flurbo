@@ -1,16 +1,19 @@
 {{extend 'layout.html'}}
 
-<div class="container">
-    <div class="jumbotron">
-        <h1>Initialize your budget system</h1>
-        <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
-        <p class="btn btn-warning btn-lg">Add Income</p>
-        <p class="btn btn-info btn-lg">Add Budget</p>
-    </div>
-    <div id="target"></div>
-</div>
+{{if init:}}
+    {{redirect(URL('default', 'this_week'))}}
+{{pass}}
+<div id="target"></div>
 
 <script id="template" type="text/ractive">
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Initialize  your budget system</h1>
+            <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
+            <a class="btn btn-warning btn-lg" on-click="change-init">Save My Changes</a>
+        </div>
+    </div>
+    <div class="container">
     <div class="row"> 
         <div class="col-md-12">
             <div class="panel panel-warning">
@@ -122,6 +125,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 </script>
@@ -272,6 +276,9 @@ $(function() {
         MAIN.set('total', calculate_total_budget());
     });
 
+    MAIN.on('change-init', function() {
+        $.ajax("{{=URL('default', 'save_init', user_signature=True)}}");
+    });
 
 });
 </script>
