@@ -13,7 +13,6 @@
                         <th>Budget Per Week</th>
                         <th>You have spent</th>
                         <th>Add spending</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -21,11 +20,12 @@
                     <tr>
                         <td>{% categories[i]['name'] %}</td>
                         <td>{% categories[i]['budget'] %}</td>
-                        <td>placeholder</td>
-                        <td><input id="spending_{% i %}"/></td>
-                        <td><span class="btn btn-success btn-sm"
+                        <td>{% spendings[i] %}</td>
+                        <td><input id="spending_{% i %}"/>
+                            <span class="btn btn-success btn-sm"
                             data-index="{% i %}"
-                            on-click="add-spending">Add</span></td>
+                            on-click="add-spending">Add</span>
+                        </td>
                     </tr>
                     {% /categories %}
                 </tbody>
@@ -45,6 +45,7 @@ $(function() {
         tripleDelimiters: ['{%%', '%%}'],
         data: {
             categories: [],
+            spendings: []
         }
     });
 
@@ -53,6 +54,7 @@ $(function() {
         method: 'POST',
         success: function (data) {
             MAIN.set('categories', data['categories']);
+            MAIN.set('spendings', data['spendings']);
             }
         }
     );
@@ -61,7 +63,7 @@ $(function() {
         var index = $(e.original.target).data('index');
         var amount = $('#spending_' + index).val();
         var category_id = MAIN.get('categories')[index]['id'];
-        console.log(index, amount, category_id);
+        spendings = MAIN.get('spendings');
         $.ajax("{{=URL('default', 'save_spending_history', user_signature=True)}}",
             {
             method: 'POST',
@@ -70,7 +72,9 @@ $(function() {
                 amount: amount
             },
             success: function (data) {
-                console.log("successful");
+                $('#spending_' + index).val('');
+                spendings[index] += parseInt(amount);
+                MAIN.set('spendings', spendings);
                 }
             }
         );

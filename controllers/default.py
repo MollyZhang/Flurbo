@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from datetime import datetime
+import datetime
 
 @auth.requires_login()
 def index():
@@ -16,12 +14,30 @@ def index():
 @auth.requires_login()
 @auth.requires_signature()
 def load_data():
-    budgets = db(db.category.user_id == auth.user_id).select().as_list()
+    categories = db(db.category.user_id == auth.user_id).select().as_list()
     fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
     income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
-    return response.json(dict(categories=budgets,
+    spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
+    spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
+    return response.json(dict(categories=categories,
                               fixed_spendings=fixed_spendings,
-                              income=income))
+                              income=income,
+                              spendings=spendings_by_user_this_week))
+
+def get_this_week_spending(spendings_by_user, budgets):
+    """this week's spending history is saved as a list in the same order as categories list"""
+    now = datetime.datetime.now()
+    this_week_start = (now - datetime.timedelta(days=now.weekday())).replace(hour=0,minute=0,second=1)
+    spendings = []
+    for budget in budgets:
+        amount = 0
+        spendings_at_this_category = db(db.spending_history.category == budget['id']).select()
+        for each in spendings_at_this_category:
+            if (each.time_stamp - this_week_start).days < 7:
+                amount += each.amount
+        spendings.append(amount)
+    return spendings
+
 
 @auth.requires_login()
 def this_week():
@@ -53,6 +69,7 @@ def save_fixed_spending():
 @auth.requires_login()
 def save_init():
     db(db.initialization.user_id==auth.user_id).update(initialized=True)
+    redirect(URL("default", "this_week"))
     return "ok"
 
 
@@ -71,7 +88,7 @@ def save_spending_history():
     db.spending_history.insert(user_id=auth.user_id,
                                category=request.vars.category_id,
                                amount=request.vars.amount,
-                               time_stamp=datetime.now()
+                               time_stamp=datetime.datetime.now()
                                )
     return "ok"
 
@@ -85,6 +102,10 @@ def delete_budget_category():
 def delete_fixed_spending():
     db(db.fixed_spending.id == request.vars.fixed_id).delete()
     return "ok"
+
+
+
+############# this part comes with web2py #######################
 
 def user():
     """
