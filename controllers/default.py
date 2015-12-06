@@ -1,5 +1,8 @@
 import datetime
 
+
+############### This part is the controller for all views #################
+
 @auth.requires_login()
 def index():
     # find out if it's a new uninitialized user
@@ -10,6 +13,24 @@ def index():
     else:
         init = user_status.initialized
     return dict(init=init)
+
+@auth.requires_login()
+def this_week():
+    return dict()
+
+@auth.requires_login()
+def edit_budget():
+    return dict()
+
+@auth.requires_login()
+def summary():
+    return dict()
+
+#############################################################################
+
+######### This part loads data for the views#################################
+
+
 
 @auth.requires_login()
 @auth.requires_signature()
@@ -39,17 +60,10 @@ def get_this_week_spending(spendings_by_user, budgets):
     return spendings
 
 
-@auth.requires_login()
-def this_week():
-    return dict()
+#############################################################################
 
-@auth.requires_login()
-def summary():
-    return dict()
+######### this part handle all the savings to database ######################
 
-
-
-######### this part handle all the savings to database
 @auth.requires_login()
 @auth.requires_signature()
 def save_income():
@@ -85,12 +99,18 @@ def save_budget():
 @auth.requires_login()
 @auth.requires_signature()
 def save_spending_history():
-    db.spending_history.insert(user_id=auth.user_id,
-                               category=request.vars.category_id,
-                               amount=request.vars.amount,
-                               time_stamp=datetime.datetime.now()
-                               )
-    return "ok"
+    try:
+        amount = int(request.vars.amount)
+        db.spending_history.insert(user_id=auth.user_id,
+                                   category=request.vars.category_id,
+                                   amount=amount,
+                                   time_stamp=datetime.datetime.now())
+        return "ok"
+    except ValueError:
+        return "wrong value"
+
+##############################################################
+
 
 ############## this part handles all the deletions ###########
 @auth.requires_signature()
@@ -103,7 +123,7 @@ def delete_fixed_spending():
     db(db.fixed_spending.id == request.vars.fixed_id).delete()
     return "ok"
 
-
+#################################################################
 
 ############# this part comes with web2py #######################
 

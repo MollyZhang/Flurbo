@@ -32,7 +32,10 @@
                 </table>
             </div>
         </div>
+    <a class="btn btn-info" href="{{=URL('default', 'edit_budget')}}">change my budget for next week</a>
+
     </div>
+
 
 </script>
 
@@ -73,7 +76,7 @@ $(function() {
             },
             success: function (data) {
                 $('#spending_' + index).val('');
-                spendings[index] += parseInt(amount);
+                if (parseInt(amount)) {spendings[index] += parseInt(amount);}
                 MAIN.set('spendings', spendings);
                 }
             }

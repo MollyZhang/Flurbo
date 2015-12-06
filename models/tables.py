@@ -57,4 +57,4 @@ db.define_table('initialization',
 # db.fixed_budget.update_or_insert(user_id = auth.user_id)
 # db.changing_budget.update_or_insert(user_id = auth.user_id)
 
-#db(db.spending_history.amount == "hhhhh").delete()
+db(db.spending_history.amount == None).delete()
