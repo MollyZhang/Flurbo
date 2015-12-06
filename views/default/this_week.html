@@ -12,6 +12,7 @@
                         <th>Budget Category</th>
                         <th>Budget Per Week</th>
                         <th>You have spent</th>
+                        <th>Budget left for this week</th>
                         <th>Add spending</th>
                     </tr>
                 </thead>
@@ -21,6 +22,7 @@
                         <td>{% categories[i]['name'] %}</td>
                         <td>{% categories[i]['budget'] %}</td>
                         <td>{% spendings[i] %}</td>
+                        <td>{% leftover[i] %}</td>
                         <td><input id="spending_{% i %}"/>
                             <span class="btn btn-success btn-sm"
                             data-index="{% i %}"
@@ -48,7 +50,8 @@ $(function() {
         tripleDelimiters: ['{%%', '%%}'],
         data: {
             categories: [],
-            spendings: []
+            spendings: [],
+            leftover:[]
         }
     });
 
@@ -58,9 +61,21 @@ $(function() {
         success: function (data) {
             MAIN.set('categories', data['categories']);
             MAIN.set('spendings', data['spendings']);
+            reset_leftover();
             }
         }
     );
+
+    function reset_leftover(){
+        var categories = MAIN.get('categories');
+        var spendings = MAIN.get('spendings');
+        var leftover = [];
+        for (i=0;i<categories.length;i++){
+            var this_left_over = parseInt(categories[i]['budget']) - parseInt(spendings[i]);
+            leftover.push(this_left_over);
+        }
+        MAIN.set('leftover', leftover);
+    }
 
     MAIN.on('add-spending', function(e) {
         var index = $(e.original.target).data('index');
@@ -78,6 +93,7 @@ $(function() {
                 $('#spending_' + index).val('');
                 if (parseInt(amount)) {spendings[index] += parseInt(amount);}
                 MAIN.set('spendings', spendings);
+                reset_leftover();
                 }
             }
         );
