@@ -6,14 +6,7 @@ import json
 
 @auth.requires_login()
 def index():
-    # find out if it's a new uninitialized user
-    user_status = db(db.initialization.user_id == auth.user_id).select().first()
-    if user_status is None:
-        db.initialization.insert(user_id=auth.user_id, initialized=False)
-        init = False
-    else:
-        init = user_status.initialized
-    return dict(init=init)
+    return dict()
 
 @auth.requires_login()
 def this_week():

@@ -1,8 +1,5 @@
 {{extend 'layout.html'}}
 
-{{if init:}}
-    {{redirect(URL('default', 'this_week'))}}
-{{pass}}
 <div id="target"></div>
 
 <script id="template" type="text/ractive">
@@ -181,6 +178,9 @@ $(function() {
         {
         method: 'POST',
         success: function (data) {
+            if (data['income']) {
+                window.location.href = "{{=URL('default',"this_week")}}";
+            }
             MAIN.set('categories', data['categories']);
             MAIN.set('fixed_spendings', data['fixed_spendings']);
             MAIN.set('total', calculate_total_budget());
