@@ -10,15 +10,15 @@
         <div class="jumbotron">
             <h1>Initialize  your budget system</h1>
             <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
-            <a class="btn btn-warning btn-lg" on-click="change-init">Save My Changes</a>
+            <a class="btn btn-success btn-lg" on-click="change-init">Save My Changes</a>
         </div>
     </div>
     <div class="container">
     <div class="row"> 
         <div class="col-md-12">
-            <div class="panel panel-warning">
+            <div class="panel panel-success">
                 <div class="panel-heading">
-                <span>Your monthly income: </span>
+                <span style="font-size: 30px">Your monthly income:
                 {% #if adding_income %}
                     <input value="{% income %}" />
                     <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
@@ -26,8 +26,8 @@
                     <span>{% income %}</span>
                     <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
                 {% /if %}
-
-                <div>Your total monthly budget: {% total %}</div>
+                <spans style="margin-left: 50px">Your total monthly budget: {% total %}</span>
+                </span>
                 </div>
             </div>
         </div>
