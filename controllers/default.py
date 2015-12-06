@@ -1,4 +1,5 @@
 import datetime
+import json
 
 
 ############### This part is the controller for all views #################
@@ -63,38 +64,38 @@ def get_this_week_spending(spendings_by_user, budgets):
 #############################################################################
 
 ######### this part handle all the savings to database ######################
-
 @auth.requires_login()
 @auth.requires_signature()
-def save_income():
-    db.monthly_income.update_or_insert(db.monthly_income.user_id==auth.user_id,
-        user_id=auth.user_id, amount=request.vars.income)
-    return "ok"
-
-@auth.requires_login()
-@auth.requires_signature()
-def save_fixed_spending():
-    db.fixed_spending.update_or_insert(
-        (db.fixed_spending.user_id==auth.user_id)&(db.fixed_spending.name==request.vars.name),
-        user_id=auth.user_id, name=request.vars.name, amount=request.vars.amount)
-    return "ok"
-
-@auth.requires_signature()
-@auth.requires_login()
-def save_init():
-    db(db.initialization.user_id==auth.user_id).update(initialized=True)
+def save_all():
+    income = request.vars.income
+    fixed_spendings = json.loads(request.vars.fixed_spendings)
+    budgets = json.loads(request.vars.budgets)
+    save_income(income, auth.user_id)
+    save_fixed_spending(fixed_spendings, auth.user_id)
+    save_budget(budgets, auth.user_id)
+    save_init(auth.user_id)
     redirect(URL("default", "this_week"))
     return "ok"
 
 
-@auth.requires_login()
-@auth.requires_signature()
-def save_budget():
-    db.category.update_or_insert(
-        (db.category.user_id==auth.user_id)&(db.category.name==request.vars.name),
-        user_id=auth.user_id, name=request.vars.name, budget=request.vars.amount)
-    return "ok"
+def save_income(income, user_id):
+    db.monthly_income.update_or_insert(db.monthly_income.user_id==user_id,
+        user_id=user_id, amount=int(income))
 
+def save_fixed_spending(fixed_spendings, user_id):
+    for spending in fixed_spendings:
+        db.fixed_spending.update_or_insert(
+            (db.fixed_spending.user_id==user_id)&(db.fixed_spending.name==spending['name']),
+            user_id=auth.user_id, name=spending['name'], amount=int(spending['amount']))
+
+def save_budget(budgets, user_id):
+    for budget in budgets:
+        db.category.update_or_insert(
+            (db.category.user_id==user_id)&(db.category.name==budget['name']),
+            user_id=auth.user_id, name=budget['name'], budget=int(budget['budget']))
+
+def save_init(user_id):
+    db(db.initialization.user_id==user_id).update(initialized=True)
 
 @auth.requires_login()
 @auth.requires_signature()

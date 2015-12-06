@@ -21,12 +21,6 @@ db.define_table('spending_history',
                 Field('time_stamp','datetime')
                 )
 
-db.spending_history.amount.requires = IS_INT_IN_RANGE(0,100000)
-
-
-
-db.spending_history.amount.requires = IS_INT_IN_RANGE(0,100000)
-
 
 db.define_table('monthly_income',
                 Field('user_id', db.auth_user, default=auth.user_id),
@@ -56,5 +50,3 @@ db.define_table('initialization',
 # ######## add one or more records to db as example
 # db.fixed_budget.update_or_insert(user_id = auth.user_id)
 # db.changing_budget.update_or_insert(user_id = auth.user_id)
-
-db(db.spending_history.amount == None).delete()
