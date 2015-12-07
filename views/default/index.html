@@ -11,28 +11,29 @@
         </div>
     </div>
     <div class="container">
-    <div class="row"> 
-        <div class="col-md-6">
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                <span style="font-size: 30px">Your monthly income:
-                {% #if adding_income %}
-                    <input value="{% income %}" />
-                    <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
-                {% else %}
-                    <span>{% income %}</span>
-                    <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
-                {% /if %}
-                </span>
+        <div class="row"> 
+            <div class="col-md-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                    <span style="font-size: 30px">Your monthly income:
+                    {% #if adding_income %}
+                        <input value="{% income %}" />
+                        <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
+                    {% else %}
+                        <span>{% income %}</span>
+                        <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
+                    {% /if %}
+                    </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                <span style="font-size: 30px">
-                    Your total monthly budget: {% total %}</span>
-                </span>
+            <div class="col-md-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                    <span style="font-size: 30px">
+                        Your total monthly budget: {% total %}</span>
+                    </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -149,7 +150,6 @@
                 </div>
             </div>
         </div>
-        </div>
     </div>
 
 </script>
@@ -214,7 +214,6 @@ $(function() {
         updated_category.push(new_category);
         MAIN.set('categories', updated_category);
         MAIN.set('total', calculate_total_budget());
-
     });
 
     MAIN.on("save_income", function() {
@@ -238,7 +237,6 @@ $(function() {
         updated_spending.push(new_spending);
         MAIN.set('fixed_spendings', updated_spending);
         MAIN.set('total', calculate_total_budget());
-
     });
 
     MAIN.on("delete_budget", function(e) {
@@ -257,6 +255,8 @@ $(function() {
 
     MAIN.on("save-budget-edit", function(e) {
         MAIN.set('budget_under_edit', -1);
+        MAIN.set('total', calculate_total_budget());
+
     })
 
     MAIN.on("delete_fixed", function(e) {
@@ -275,6 +275,8 @@ $(function() {
 
     MAIN.on("save-fixed-edit", function(e) {
         MAIN.set('fixed_under_edit', -1);
+        MAIN.set('total', calculate_total_budget());
+
     })
 
     MAIN.on('save-all', function() {

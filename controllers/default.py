@@ -33,14 +33,12 @@ def summary():
 
 ######### This part loads data for the views#################################
 
-
-
 @auth.requires_login()
 @auth.requires_signature()
 def load_data():
     categories = db(db.category.user_id == auth.user_id).select().as_list()
     fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
-    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
+    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()[0]['amount']
     spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
     spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
     return response.json(dict(categories=categories,
@@ -75,8 +73,6 @@ def save_all():
     save_income(income, auth.user_id)
     save_fixed_spending(fixed_spendings, auth.user_id)
     save_budget(budgets, auth.user_id)
-    save_init(auth.user_id)
-    redirect(URL("default", "this_week"))
     return "ok"
 
 
@@ -95,9 +91,6 @@ def save_budget(budgets, user_id):
         db.category.update_or_insert(
             (db.category.user_id==user_id)&(db.category.name==budget['name']),
             user_id=auth.user_id, name=budget['name'], budget=int(budget['budget']))
-
-def save_init(user_id):
-    db(db.initialization.user_id==user_id).update(initialized=True)
 
 @auth.requires_login()
 @auth.requires_signature()

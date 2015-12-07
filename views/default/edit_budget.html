@@ -4,122 +4,151 @@
 
 <script id="template" type="text/ractive">
     <div class="container">
-    <a class="btn btn-warning btn-lg">Go to</a>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-warning">
-                <div class="panel-heading">
-                <span>Your monthly income: </span>
-                {% #if adding_income %}
-                    <input value="{% income %}" />
-                    <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
-                {% else %}
-                    <span>{% income %}</span>
-                    <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
-                {% /if %}
-
-                <div>Your total monthly budget: {% total %}</div>
-                </div>
-            </div>
+        <div class="jumbotron">
+            <a class="btn btn-success btn-lg" on-click="save-all">Save My Changes</a>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3>Budgets that changes over time: </h3>
-                </div>
-                <table class="table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Budget Per Week</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% #categories:i %}
-                    <tr>
-                        <td>{% categories[i]['name'] %}</td>
-                        <td>{% categories[i]['budget'] %}</td>
-                        <td>
-                            <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash"
-                                on-click="delete_budget"></i>
-                        </td>
-                    </tr>
-                    {% /categories %}
-
-                    {% #if adding_budget %}
-                    <tr>
-                        <td><input placeholder="new budget category" id="category_name" /></td>
-                        <td><input placeholder="0" id="category_budget" /></td>
-                    </tr>
-                    {% /if %}
-                </tbody>
-                </table>
-                <div class="panel-footer">
-                    {% #if !adding_budget %}
-                        <div class="btn btn-info btn-lg" on-click="add-budget">
-                        <i class="fa fa-plus"></i></div>
+    <div class="container">
+        <div class="row"> 
+            <div class="col-md-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                    <span style="font-size: 30px">Your monthly income:
+                    {% #if adding_income %}
+                        <input value="{% income %}" />
+                        <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
                     {% else %}
-                        <div class="btn btn-info btn-lg" on-click="save-budget">
-                        <i class="fa fa-floppy-o"></i></div>
+                        <span>{% income %}</span>
+                        <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
                     {% /if %}
+                    </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                    <span style="font-size: 30px">
+                        Your total monthly budget: {% total %}</span>
+                    </span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3>Budgets fixed per month: </h3>
+
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3>Budgets that changes over time: </h3>
+                    </div>
+                    <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Budget Per Week</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% #categories:i %}
+                        <tr>
+                            <td>{% categories[i]['name'] %}</td>
+                            {% #if budget_under_edit != i %}
+                                <td>{% categories[i]['budget'] %}</td>
+                                <td>
+                                    <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-pencil"
+                                        on-click="edit_budget"></i>
+                                </td>
+                            {% else %}
+                                <td><input value={% categories[i]['budget'] %} />
+                                    <i class="btn btn-info fa fa-floppy-o"
+                                        on-click="save-budget-edit"></i></td>
+                            {% /if %}
+                            
+                        </tr>
+                        {% /categories %}
+
+                        {% #if adding_budget %}
+                        <tr>
+                            <td><input placeholder="new budget category" id="category_name" /></td>
+                            <td><input placeholder="0" id="category_budget" /></td>
+                        </tr>
+                        {% /if %}
+                    </tbody>
+                    </table>
+                    <div class="panel-footer">
+                        {% #if !adding_budget %}
+                            <div class="btn btn-info btn-lg" on-click="add-budget">
+                            <i class="fa fa-plus"></i></div>
+                        {% else %}
+                            <div class="btn btn-info btn-lg" on-click="save-budget">
+                            <i class="fa fa-floppy-o"></i></div>
+                        {% /if %}
+                    </div>
                 </div>
-                <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Amount Per Month</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% #fixed_spendings:i %}
-                    <tr>
-                        <td>{% fixed_spendings[i]['name'] %}</td>
-                        <td>{% fixed_spendings[i]['amount'] %}</td>
-                        <td>
-                            <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-trash"
-                                on-click="delete_fixed"></i>
-                        </td>
+            </div>
 
-                    </tr>
-                    {% /fixed_spendings %}
+            <div class="col-md-5">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3>Budgets fixed per month: </h3>
+                    </div>
+                    <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Amount Per Month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% #fixed_spendings:i %}
+                        <tr>
+                            <td>{% fixed_spendings[i]['name'] %}</td>
+                            {% #if fixed_under_edit !=i %}
+                                <td>{% fixed_spendings[i]['amount'] %}</td>
+                                <td>
+                                    <i data-index="{% i %}" class="btn btn-default btn-sm fa fa-pencil"
+                                        on-click="edit_fixed"></i>
+                                </td>
+                            {% else %}
+                                <td><input value={% fixed_spendings[i]['amount'] %} />
+                                    <i class="btn btn-info fa fa-floppy-o"
+                                        on-click="save-fixed-edit"></i></td>
+                            {% /if %}
 
-                    {% #if adding_fixed %}
-                    <tr>
-                        <td><input placeholder="new fixed spending" id="spending_name" /></td>
-                        <td><input placeholder="0" id="spending_amount" /></td>
-                    </tr>
-                    {% /if %}
-                </tbody>
-                </table>
-                <div class="panel-footer">
-                    {% #if !adding_fixed %}
-                        <div class="btn btn-info btn-lg" on-click="add_fixed">
-                        <i class="fa fa-plus"></i>
-                        </div>
-                    {% else %}
-                        <div class="btn btn-info btn-lg" on-click="save_fixed">
-                        <i class="fa fa-floppy-o"></i>
-                        </div>
-                    {% /if %}
+
+                        </tr>
+                        {% /fixed_spendings %}
+
+                        {% #if adding_fixed %}
+                        <tr>
+                            <td><input placeholder="new fixed spending" id="spending_name" /></td>
+                            <td><input placeholder="0" id="spending_amount" /></td>
+                        </tr>
+                        {% /if %}
+                    </tbody>
+                    </table>
+                    <div class="panel-footer">
+                        {% #if !adding_fixed %}
+                            <div class="btn btn-info btn-lg" on-click="add_fixed">
+                            <i class="fa fa-plus"></i>
+                            </div>
+                        {% else %}
+                            <div class="btn btn-info btn-lg" on-click="save_fixed">
+                            <i class="fa fa-floppy-o"></i>
+                            </div>
+                        {% /if %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-
 </script>
+
 
 <script>
 $(function() {
@@ -132,6 +161,8 @@ $(function() {
             adding_income: false,
             adding_budget: false,
             adding_fixed: false,
+            budget_under_edit: -1,
+            fixed_under_edit: -1,
             income: 0,
             categories: [],
             fixed_spendings: [],
@@ -145,7 +176,7 @@ $(function() {
         success: function (data) {
             MAIN.set('categories', data['categories']);
             MAIN.set('fixed_spendings', data['fixed_spendings']);
-            MAIN.set('income', data['income'][0]['amount']);
+            MAIN.set('income', data['income']);
             MAIN.set('total', calculate_total_budget());
             }
         }
@@ -171,15 +202,6 @@ $(function() {
     MAIN.on('save-budget', function(){
         var name = $('#category_name').val();
         var amount = $('#category_budget').val();
-        $.ajax("{{=URL('default', 'save_budget', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                name: name,
-                amount: amount
-                }
-            }
-        );
         MAIN.set('adding_budget', false);
         var new_category = {"name": name, "budget": amount};
         var updated_category = MAIN.get('categories');
@@ -192,19 +214,10 @@ $(function() {
     MAIN.on("save_income", function() {
         MAIN.set("adding_income", false);
         income = MAIN.get('income');
-        $.ajax("{{=URL('default', 'save_income', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                income: income
-                }
-            }
-        );
     });
     MAIN.on("edit_income", function() {
         MAIN.set("adding_income", true);
     });
-
 
     MAIN.on('add_fixed', function(){
         MAIN.set('adding_fixed', true);
@@ -213,15 +226,6 @@ $(function() {
     MAIN.on('save_fixed', function(){
         var name = $('#spending_name').val();
         var amount = $('#spending_amount').val();
-        $.ajax("{{=URL('default', 'save_fixed_spending', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                name: name,
-                amount: amount
-                }
-            }
-        );
         MAIN.set('adding_fixed', false);
         var new_spending = {"name": name, "amount": amount};
         var updated_spending = MAIN.get('fixed_spendings');
@@ -231,44 +235,59 @@ $(function() {
 
     });
 
-    MAIN.on("delete_budget", function(e) {
+    // MAIN.on("delete_budget", function(e) {
+    //     var index = $(e.original.target).data('index');
+    //     categories = MAIN.get('categories');
+    //     target_category = categories[index];
+    //     categories.splice(index,1);
+    //     MAIN.set('categories', categories);
+    //     MAIN.set('total', calculate_total_budget());
+    // });
+
+    MAIN.on("edit_budget", function(e) {
         var index = $(e.original.target).data('index');
+        MAIN.set('budget_under_edit', index);
+    });
+
+    MAIN.on("save-budget-edit", function(e) {
+        MAIN.set('budget_under_edit', -1);
+        MAIN.set('total', calculate_total_budget());
+    })
+
+    // MAIN.on("delete_fixed", function(e) {
+    //     var index = $(e.original.target).data('index');
+    //     fixed = MAIN.get('fixed_spendings');
+    //     target_fixed = fixed[index];
+    //     fixed.splice(index,1);
+    //     MAIN.set('fixed_spendings', fixed);
+    //     MAIN.set('total', calculate_total_budget());
+    // });
+
+    MAIN.on("edit_fixed", function(e) {
+        var index = $(e.original.target).data('index');
+        MAIN.set('fixed_under_edit', index);
+    });
+
+    MAIN.on("save-fixed-edit", function(e) {
+        MAIN.set('fixed_under_edit', -1);
+        MAIN.set('total', calculate_total_budget());
+    })
+
+    MAIN.on('save-all', function() {
+        fixed_spendings = MAIN.get('fixed_spendings');
+        income = MAIN.get('income');
         categories = MAIN.get('categories');
-        target_category = categories[index];
-        console.log(target_category);
-        $.ajax("{{=URL('default', 'delete_budget_category', user_signature=True)}}",
+        $.ajax("{{=URL('default', 'save_all', user_signature=True)}}",
             {
             method: 'POST',
             data: {
-                category_id: target_category['id']
+                fixed_spendings: JSON.stringify(fixed_spendings),
+                budgets: JSON.stringify(categories),
+                income: income
                 }
             }
         );
-        categories.splice(index,1);
-        MAIN.set('categories', categories);
-        MAIN.set('total', calculate_total_budget());
-
-    });
-
-    MAIN.on("delete_fixed", function(e) {
-        var index = $(e.original.target).data('index');
-        fixed = MAIN.get('fixed_spendings');
-        target_fixed = fixed[index];
-        $.ajax("{{=URL('default', 'delete_fixed_spending', user_signature=True)}}",
-            {
-            method: 'POST',
-            data: {
-                fixed_id: target_fixed['id']
-                }
-            }
-        );
-        fixed.splice(index,1);
-        MAIN.set('fixed_spendings', fixed);
-        MAIN.set('total', calculate_total_budget());
-    });
-
-    MAIN.on('change-init', function() {
-        $.ajax("{{=URL('default', 'save_init', user_signature=True)}}");
+        window.location.href="{{=URL('default',"this_week")}}";
     });
 
 });
