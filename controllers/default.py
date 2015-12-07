@@ -10,7 +10,14 @@ def index():
 
 @auth.requires_login()
 def this_week():
-    return dict()
+    db.spending_history.category.readable = False
+    query = db.spending_history.category == db.category.id
+    grid = SQLFORM.grid(query,create=False,deletable=False,editable=False,details=False,paginate=20,
+                        fields=[db.spending_history.category,
+                                db.category.name,
+                                db.spending_history.amount,
+                                db.spending_history.time_stamp])
+    return dict(grid=grid)
 
 @auth.requires_login()
 def edit_budget():
@@ -19,6 +26,8 @@ def edit_budget():
 @auth.requires_login()
 def summary():
     return dict()
+
+
 
 #############################################################################
 

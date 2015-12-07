@@ -1,7 +1,5 @@
 {{extend 'layout.html'}}
 
-<div id="target"></div>
-
 <script id="template" type="text/ractive">
     <div class="container">
         <div class="row">
@@ -34,12 +32,28 @@
                 </table>
             </div>
         </div>
-    <a class="btn btn-info" href="{{=URL('default', 'edit_budget')}}">change my budget for next week</a>
-
     </div>
-
-
 </script>
+
+<div id="target"></div>
+<div class="container">
+    <a class="btn btn-info" href="{{=URL('default', 'edit_budget')}}">change my budget for future</a>
+    <a class="btn btn-warning" id="history_toggle">view my spending history</a>
+</div>
+<div class="container" id="history" style="display: None">
+    {{=grid}}
+</div>
+
+<script>
+    $(document).ready(function(){
+        $("#history_toggle").click(function(){
+            $("#history").toggle();
+        });
+    });
+</script>
+
+
+
 
 <script>
 $(function() {
