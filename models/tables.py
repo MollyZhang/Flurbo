@@ -4,7 +4,7 @@ db.define_table('category',
                 Field('user_id', db.auth_user, default=auth.user_id),
                 Field('name', 'string'),
                 Field('budget', 'integer'),
-                Field('start_time')
+                Field('start_time','datetime')
                 )
 
 db.define_table('spending_history',
@@ -28,7 +28,7 @@ db.define_table('fixed_spending',
                 Field('user_id', db.auth_user, default=auth.user_id),
                 Field('name', 'string'),
                 Field('amount', 'integer'),
-                Field('start_time')
+                Field('start_time','datetime')
                 )
 
 

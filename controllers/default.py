@@ -42,10 +42,19 @@ def load_data():
     income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
     spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
     spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
-    return response.json(dict(categories=categories,
+    budget_this_week = get_this_week_budget(categories)
+    return response.json(dict(categories=budget_this_week,
                               fixed_spendings=fixed_spendings,
                               income=income,
                               spendings=spendings_by_user_this_week))
+
+def get_this_week_budget(categories):
+    this_week = []
+    now = datetime.datetime.now()
+    for budget in categories:
+        if (now - budget['start_time']).days >= 0 and (now-budget['start_time']).days <= 7:
+            this_week.append(budget)
+    return this_week
 
 def get_this_week_spending(spendings_by_user, budgets):
     """this week's spending history is saved as a list in the same order as categories list"""
