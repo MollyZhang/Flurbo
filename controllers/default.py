@@ -15,11 +15,14 @@ def this_week():
 
 @auth.requires_login()
 def spending_history():
-    db.spending_history.category.readable = False
-    query = db.spending_history.category == db.category.id
-    grid = SQLFORM.grid(query,create=False,deletable=False,editable=False,details=False,paginate=20,
+    db.spending_history.category.readable = True
+    db.spending_history.user_id.readable = False
+    db.spending_history.user_id.writable = False
+
+    # q1 = (db.spending_history.category == db.category.id)
+    q2 = (db.spending_history.user_id == auth.user_id)
+    grid = SQLFORM.grid(q2,create=False,deletable=False,editable=True,details=False,paginate=20,
                         fields=[db.spending_history.category,
-                                db.category.name,
                                 db.spending_history.amount,
                                 db.spending_history.time_stamp])
     return dict(grid=grid)
