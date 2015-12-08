@@ -1,6 +1,7 @@
 import datetime
 import json
 import calendar
+import os
 
 
 ############### This part is the controller for all views #################
@@ -34,7 +35,6 @@ def edit_budget():
 @auth.requires_login()
 def summary():
     return dict()
-
 
 
 #############################################################################

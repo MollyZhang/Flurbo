@@ -1,4 +1,14 @@
 {{extend 'layout.html'}}
 
+<script type="text/javascript" src="{{=URL('static','js/dygraph-combined-dev.js')}}"></script>
 
+<div id="graphdiv"></div>
 
+<script type="text/javascript">
+$(function() {
+    g = new Dygraph(
+        document.getElementById("graphdiv"),
+        "/flurbo/static/data/demo.txt"
+    );
+})
+</script>
