@@ -3,41 +3,32 @@
 <div id="target"></div>
 
 <script id="template" type="text/ractive">
-    <div class="container">
-        <div class="jumbotron">
-            <h1>Initialize  your budget system</h1>
-            <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
-            <a class="btn btn-success btn-lg" on-click="save-all">Save My Changes</a>
-        </div>
+    <div class="jumbotron">
+        <h1>Initialize  your budget system</h1>
+        <p>take five minutes to fill in your income, budget category and budget amount to get started!</p>
+        <a class="btn btn-success btn-lg" on-click="save-all">Save My Changes</a>
     </div>
     <div class="container">
-        <div class="row"> 
-            <div class="col-md-6">
-                <div class="panel panel-success">
-                    <div class="panel-heading">
-                    <span style="font-size: 30px">Your monthly income:
-                    {% #if adding_income %}
-                        <input value="{% income %}" />
-                        <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
-                    {% else %}
-                        <span>{% income %}</span>
-                        <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
-                    {% /if %}
-                    </span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="panel panel-success">
-                    <div class="panel-heading">
-                    <span style="font-size: 30px">
-                        Your total monthly budget: {% total %}</span>
-                    </span>
-                    </div>
-                </div>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+            <span style="font-size: 30px">Your monthly income:
+            {% #if adding_income %}
+                <input value="{% income %}" />
+                <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
+            {% else %}
+                <span>{% income %}</span>
+                <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
+            {% /if %}
+            </span>
             </div>
         </div>
-
+        <div class="panel panel-success">
+            <div class="panel-heading">
+            <span style="font-size: 30px">
+                Your total monthly budget: {% total %}</span>
+            </span>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-6">
@@ -178,7 +169,7 @@ $(function() {
         {
         method: 'POST',
         success: function (data) {
-            if (data['income']) {
+            if (data['income'].length > 0) {
                 window.location.href = "{{=URL('default',"this_week")}}";
             }
             MAIN.set('categories', data['categories']);
@@ -276,8 +267,7 @@ $(function() {
     MAIN.on("save-fixed-edit", function(e) {
         MAIN.set('fixed_under_edit', -1);
         MAIN.set('total', calculate_total_budget());
-
-    })
+    });
 
     MAIN.on('save-all', function() {
         fixed_spendings = MAIN.get('fixed_spendings');
@@ -289,7 +279,8 @@ $(function() {
             data: {
                 fixed_spendings: JSON.stringify(fixed_spendings),
                 budgets: JSON.stringify(categories),
-                income: income
+                income: income,
+                initial: true
                 }
             }
         );
@@ -298,3 +289,4 @@ $(function() {
 
 });
 </script>
+

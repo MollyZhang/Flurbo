@@ -1,5 +1,6 @@
 import datetime
 import json
+import calendar
 
 
 ############### This part is the controller for all views #################
@@ -38,7 +39,7 @@ def summary():
 def load_data():
     categories = db(db.category.user_id == auth.user_id).select().as_list()
     fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
-    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()[0]['amount']
+    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
     spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
     spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
     return response.json(dict(categories=categories,
@@ -67,30 +68,66 @@ def get_this_week_spending(spendings_by_user, budgets):
 @auth.requires_login()
 @auth.requires_signature()
 def save_all():
+    initial = json.loads(request.vars.initial)
     income = request.vars.income
     fixed_spendings = json.loads(request.vars.fixed_spendings)
     budgets = json.loads(request.vars.budgets)
     save_income(income, auth.user_id)
-    save_fixed_spending(fixed_spendings, auth.user_id)
-    save_budget(budgets, auth.user_id)
+    now = datetime.datetime.now()
+    this_monday = (now - datetime.timedelta(days=now.weekday())).replace(hour=0,minute=0,second=1)
+    next_monday = this_monday + datetime.timedelta(days=7)
+    beginning_of_this_month = now.replace(day=1, hour=0, minute=0, second=1)
+    days_in_this_month = calendar.monthrange(now.year, now.month)[1]
+    beginning_of_next_month = now + datetime.timedelta(days=days_in_this_month)
+    if initial:
+        save_initial_budget(budgets, auth.user_id, this_monday)
+        save_initial_fixed_spending(fixed_spendings,auth.user_id,beginning_of_this_month)
+    else:
+        save_next_week_budget(budgets, auth.user_id, next_monday)
+        save_next_month_fixed(fixed_spendings, auth.user_id, beginning_of_next_month)
+        print "hah"
     return "ok"
-
 
 def save_income(income, user_id):
     db.monthly_income.update_or_insert(db.monthly_income.user_id==user_id,
         user_id=user_id, amount=int(income))
 
-def save_fixed_spending(fixed_spendings, user_id):
+def save_initial_fixed_spending(fixed_spendings, user_id, time):
     for spending in fixed_spendings:
-        db.fixed_spending.update_or_insert(
-            (db.fixed_spending.user_id==user_id)&(db.fixed_spending.name==spending['name']),
-            user_id=auth.user_id, name=spending['name'], amount=int(spending['amount']))
+        db.fixed_spending.insert(user_id=auth.user_id,
+                                 name=spending['name'],
+                                 amount=int(spending['amount']),
+                                 start_time=time)
 
-def save_budget(budgets, user_id):
+def save_initial_budget(budgets, user_id, this_monday):
     for budget in budgets:
-        db.category.update_or_insert(
-            (db.category.user_id==user_id)&(db.category.name==budget['name']),
-            user_id=auth.user_id, name=budget['name'], budget=int(budget['budget']))
+            db.category.insert(user_id=auth.user_id,
+                               name=budget['name'],
+                               budget=int(budget['budget']),
+                               start_time=this_monday)
+
+def save_next_week_budget(budgets, user_id, next_monday):
+    for budget in budgets:
+        q1 = (db.category.user_id==user_id)
+        q2 = (db.category.name == budget['name'])
+        q3 = (db.category.start_time == next_monday)
+        db.category.update_or_insert(q1 & q2 & q3,
+                                     user_id=user_id,
+                                     name=budget['name'],
+                                     budget=int(budget['budget']),
+                                     start_time=next_monday)
+
+
+def save_next_month_fixed(fixed_spendings, user_id, time):
+    for spending in fixed_spendings:
+        q1 = (db.fixed_spending.user_id==user_id)
+        q2 = (db.fixed_spending.name == spending['name'])
+        q3 = (db.fixed_spending.start_time == time)
+        db.fixed_spending.update_or_insert(q1 & q2 & q3,
+                                     user_id=user_id,
+                                     name=spending['name'],
+                                     amount=int(spending['amount']),
+                                     start_time=time)
 
 @auth.requires_login()
 @auth.requires_signature()
