@@ -11,6 +11,10 @@ def index():
 
 @auth.requires_login()
 def this_week():
+    return dict()
+
+@auth.requires_login()
+def spending_history():
     db.spending_history.category.readable = False
     query = db.spending_history.category == db.category.id
     grid = SQLFORM.grid(query,create=False,deletable=False,editable=False,details=False,paginate=20,
