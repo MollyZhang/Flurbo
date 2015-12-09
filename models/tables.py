@@ -14,13 +14,14 @@ db.define_table('spending_history',
                 Field('time_stamp','datetime')
                 )
 
-db.spending_history.user_id.writable = db.spending_history.user_id.readable = False
-db.spending_history.id.writable = db.spending_history.id.readable = False
+# db.spending_history.user_id.writable = db.spending_history.user_id.readable = False
+# db.spending_history.id.writable = db.spending_history.id.readable = False
 
 
 db.define_table('monthly_income',
                 Field('user_id', db.auth_user, default=auth.user_id),
                 Field('amount', 'integer'),
+                Field('start_month') ## in the format of YYYYMM
                 )
 
 # fixed spending per month
