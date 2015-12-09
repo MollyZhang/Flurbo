@@ -14,6 +14,10 @@ def index():
 def this_week():
     return dict()
 
+@auth.requires_signature()
+def edit():
+    return dict()
+
 @auth.requires_login()
 def spending_history():
     db.spending_history.category.readable = True
@@ -50,6 +54,7 @@ def load_data():
     spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
     spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
     budget_this_week = get_this_week_budget(categories)
+    print income
     return response.json(dict(categories=budget_this_week,
                               fixed_spendings=fixed_spendings,
                               income=income,
@@ -84,6 +89,7 @@ def get_this_week_spending(spendings_by_user, budgets):
 @auth.requires_login()
 @auth.requires_signature()
 def save_all():
+    print "hey I am called"
     initial = json.loads(request.vars.initial)
     income = request.vars.income
     fixed_spendings = json.loads(request.vars.fixed_spendings)
@@ -101,7 +107,6 @@ def save_all():
     else:
         save_next_week_budget(budgets, auth.user_id, next_monday)
         save_next_month_fixed(fixed_spendings, auth.user_id, beginning_of_next_month)
-        print "hah"
     return "ok"
 
 def save_income(income, user_id):
