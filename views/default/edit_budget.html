@@ -219,7 +219,7 @@ $(function() {
     });
 
 
-    $.ajax("{{=URL('default', 'load_data', user_signature=True)}}",
+    $.ajax("{{=URL('default', 'load_budget_data', user_signature=True)}}",
         {
         method: 'POST',
         success: function (data) {

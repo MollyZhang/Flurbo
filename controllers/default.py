@@ -20,17 +20,17 @@ def edit():
 
 @auth.requires_login()
 def spending_history():
-    db.spending_history.category.readable = True
-    db.spending_history.user_id.readable = False
-    db.spending_history.user_id.writable = False
-
-    # q1 = (db.spending_history.category == db.category.id)
-    q2 = (db.spending_history.user_id == auth.user_id)
-    grid = SQLFORM.grid(q2,create=False,deletable=False,editable=True,details=False,paginate=20,
-                        fields=[db.spending_history.category,
-                                db.spending_history.amount,
-                                db.spending_history.time_stamp])
-    return dict(grid=grid)
+    # db.spending_history.category.readable = True
+    # db.spending_history.user_id.readable = False
+    # db.spending_history.user_id.writable = False
+    #
+    # # q1 = (db.spending_history.category == db.category.id)
+    # q2 = (db.spending_history.user_id == auth.user_id)
+    # grid = SQLFORM.grid(q2,create=False,deletable=False,editable=True,details=False,paginate=20,
+    #                     fields=[db.spending_history.category,
+    #                             db.spending_history.amount,
+    #                             db.spending_history.time_stamp])
+    return dict()
 
 @auth.requires_login()
 def edit_budget():
@@ -47,10 +47,11 @@ def summary():
 
 @auth.requires_login()
 @auth.requires_signature()
-def load_data():
+def load_budget_data():
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
-    this_Monday = now.strftime('%Y%m%d')
+    this_Monday = (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d')
+
     next_month = get_next_month(now)
     next_Monday = (now + datetime.timedelta(days=7)).strftime('%Y%m%d')
 
@@ -91,27 +92,81 @@ def get_next_month(now):
     return next_month.strftime('%Y%m')
 
 
-def get_this_week_budget(budgets):
-    this_week = []
+@auth.requires_login()
+@auth.requires_signature()
+def load_week_data():
     now = datetime.datetime.now()
-    for budget in budgets:
-        if (now - budget['start_time']).days >= 0 and (now-budget['start_time']).days <= 7:
-            this_week.append(budget)
-    return this_week
+    this_Monday = (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d')
 
-def get_this_week_spending(spendings_by_user, budgets):
-    """this week's spending history is saved as a list in the same order as categories list"""
-    now = datetime.datetime.now()
-    this_week_start = (now - datetime.timedelta(days=now.weekday())).replace(hour=0,minute=0,second=1)
-    spendings = []
+    q1 = (db.budget.user_id==auth.user_id)
+    q2 = (db.budget.start_date==this_Monday)
+    preset_budget = db(q1 & q2).select().as_list()
+    current_budget_category = get_current_budget_categories(preset_budget)
+
+
+    spendings = db(db.spending_history.user_id==auth.user_id).select().as_list()
+    this_week_spent = get_spent(spendings, current_budget_category)[1]
+    previous_week_spent = get_spent(spendings, current_budget_category)[0]
+    previous_budget_sum = get_previous_budget_sum(current_budget_category)
+
+
+    # budget_categories = []
+    # for
+    #
+    # if len(previous_week_spent) == 0 and len(previous_budget_sum) == 0:
+    #     current_available_budget = dict(preset_budget)
+    # else:
+    #     # TODO: deal with budget history
+    #     raise Exception("UnImplmentedError")
+
+    return response.json(dict(preset_budget=preset_budget,
+                              this_week_spent=this_week_spent,
+                              current_available_budget=1))
+
+def get_current_budget_categories(budgets):
+    categories = []
     for budget in budgets:
-        amount = 0
-        spendings_at_this_category = db(db.spending_history.category == budget['id']).select()
-        for each in spendings_at_this_category:
-            if (each.time_stamp - this_week_start).days < 7:
-                amount += each.amount
-        spendings.append(amount)
-    return spendings
+        categories.append(budget['name'])
+    return categories
+
+def get_previous_budget_sum(categories):
+    """only return the past budget sum based on the given budget categories"""
+    now = datetime.datetime.now()
+    this_Monday = datetime.datetime.strptime(
+        (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d'), "%Y%m%d")
+    budget_sum = {}
+    for category in categories:
+        budget_sum[category] = 0
+    budgets = db(db.budget.user_id==auth.user_id).select()
+    # for budget in budgets:
+    #     print datetime.datetime.strptime(budget.start_date, "%Y%m%d")
+    #    if datetime.datetime.strptime(budget.start_date, "%Y%m%d") >= this_Monday:
+    #         pass
+    #     else:
+    #         if budget.name not in budget_sum.keys():
+    #             budget_sum[budget.name] = budget.amount
+    #         else:
+    #             budget_sum[budget.name] += budget.amount
+    # return budget_sum
+
+def get_spent(spendings, categories):
+    """only return the current and past spendings based on the given budget categories """
+    now = datetime.datetime.now()
+    this_monday_mid_night = (now - datetime.timedelta(days=now.weekday())).replace(hour=0,minute=0,second=1)
+    # initialize these two dictionary values to 0
+    this_week_spent = {}
+    previous_week_spent = {}
+    for category in categories:
+        this_week_spent[category] = 0
+        previous_week_spent[category] = 0
+    for spending in spendings:
+        if spending['time_stamp'] < this_monday_mid_night:
+            if spending['budget_category'] in categories:
+                previous_week_spent[spending['budget_category']] += spending['amount']
+        else:
+            if spending['budget_category'] in categories:
+                this_week_spent[spending['budget_category']] += spending['amount']
+    return [previous_week_spent, this_week_spent]
 
 
 #############################################################################
@@ -126,18 +181,19 @@ def save_initial():
     user_id = auth.user_id
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
-    this_Monday = now.strftime('%Y%m%d')
+    this_Monday = (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d')
     income = int(request.vars.income)
     db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
     budgets = json.loads(request.vars.budgets)
     for budget in budgets:
+        print budget
         db.budget.insert(user_id=user_id, name=budget['name'],
                          amount=int(budget['amount']), start_date=this_Monday)
     fixed_spendings = json.loads(request.vars.fixed_spendings)
     for spending in fixed_spendings:
         db.fixed_spending.insert(user_id=user_id, name=spending['name'],
                                  amount=int(spending['amount']), start_month=this_month)
-
+    print "hey I am ran"
     return "ok"
 
 
@@ -146,7 +202,8 @@ def save_initial():
 def save_edit():
     """update data for next week/month to database by deleting old ones and inserting new ones"""
     now = datetime.datetime.now()
-    next_Monday = (now + datetime.timedelta(days=7)).strftime("%Y%m%d")
+    this_Monday = now - datetime.timedelta(days=now.weekday())
+    next_Monday = (this_Monday + datetime.timedelta(days=7)).strftime("%Y%m%d")
     next_month = get_next_month(now)
 
     income_query1 = (db.monthly_income.user_id == auth.user_id)
@@ -175,15 +232,10 @@ def save_edit():
 @auth.requires_login()
 @auth.requires_signature()
 def save_spending_history():
-    try:
-        amount = int(request.vars.amount)
-        db.spending_history.insert(user_id=auth.user_id,
-                                   category=request.vars.category_id,
-                                   amount=amount,
-                                   time_stamp=datetime.datetime.now())
-        return "ok"
-    except ValueError:
-        return "wrong value"
+    db.spending_history.insert(user_id=auth.user_id,
+                               budget_category=request.vars.budget_category,
+                               amount=int(request.vars.amount),time_stamp=datetime.datetime.now())
+    return "ok"
 
 ##############################################################
 ############## this part handles all the deletions ###########
@@ -198,7 +250,6 @@ def save_spending_history():
 #     return "ok"
 
 #################################################################
-
 ############# this part comes with web2py #######################
 
 def user():
