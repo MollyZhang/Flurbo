@@ -9,8 +9,17 @@
 </div>
 </div>
 <div class="graph" id="demo"></div>
+<a class="btn btn-default" id="show_demo">hide demo</a>
 <div class="graph" id="budget_history"></div>
 <div class="graph" id="spending_history"></div>
+
+<script>
+    $(document).ready(function(){
+        $("#show_demo").click(function(){
+            $("#demo").toggle();
+        });
+    });
+</script>
 
 
 <script type="text/javascript">
@@ -22,7 +31,8 @@ $(function() {
         '/flurbo/static/data/demo.txt',
         {
             title: 'Food budget and spending (demo)',
-            ylabel: "dollar"
+            ylabel: "dollar",
+            legend: "always"
         }
     );
 
