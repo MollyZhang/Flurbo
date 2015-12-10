@@ -20,17 +20,14 @@ def edit():
 
 @auth.requires_login()
 def spending_history():
-    # db.spending_history.category.readable = True
-    # db.spending_history.user_id.readable = False
+    db.spending_history.id.readable = db.spending_history.id.writable = False
+    db.spending_history.user_id.readable = db.spending_history.writable = False
     # db.spending_history.user_id.writable = False
-    #
-    # # q1 = (db.spending_history.category == db.category.id)
-    # q2 = (db.spending_history.user_id == auth.user_id)
-    # grid = SQLFORM.grid(q2,create=False,deletable=False,editable=True,details=False,paginate=20,
-    #                     fields=[db.spending_history.category,
-    #                             db.spending_history.amount,
-    #                             db.spending_history.time_stamp])
-    return dict()
+
+    # q1 = (db.spending_history.category == db.category.id)
+    q2 = (db.spending_history.user_id == auth.user_id)
+    grid = SQLFORM.grid(q2,create=False,deletable=False,editable=True,details=False,paginate=20)
+    return dict(grid=grid)
 
 @auth.requires_login()
 def edit_budget():
@@ -38,7 +35,30 @@ def edit_budget():
 
 @auth.requires_login()
 def summary():
+    # save budget history and spending history to txt file to be read later
+    budgets = db(db.budget.user_id==auth.user_id).select()
+    save_budget_history_to_file(budgets, auth.user_id)
     return dict()
+
+
+def save_budget_history_to_file(budgets, user_id):
+    path="/Users/Molly/Desktop/CMPS183/web2py/web2py/applications/flurbo/static/data/"
+    file_name = str(user_id) + "_budget_history_updated_" + str(datetime.datetime.now().date())
+    budget_dict = {}
+    for budget in budgets:
+        if budget.start_date not in budget_dict.keys():
+            budget_dict[budget.start_date] = {budget.name:budget.amount}
+        else:
+            budget_dict[budget.start_date][budget.name] = budget.amount
+    
+
+
+    # f = open(path+file_name+".txt", "w")
+    # first_line = "date"
+    # for budget in budgets:
+    #     first_line = first_line + "," + budget.name
+    # print first_line
+    print budget_dict
 
 
 #############################################################################
@@ -229,18 +249,6 @@ def save_spending_history():
                                budget_category=request.vars.budget_category,
                                amount=int(request.vars.amount),time_stamp=datetime.datetime.now())
     return "ok"
-
-##############################################################
-############## this part handles all the deletions ###########
-# @auth.requires_signature()
-# def delete_budget_category():
-#     db(db.category.id == request.vars.category_id).delete()
-#     return "ok"
-#
-# @auth.requires_signature()
-# def delete_fixed_spending():
-#     db(db.fixed_spending.id == request.vars.fixed_id).delete()
-#     return "ok"
 
 #################################################################
 ############# this part comes with web2py #######################

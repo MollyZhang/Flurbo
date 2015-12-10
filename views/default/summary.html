@@ -2,13 +2,20 @@
 
 <script type="text/javascript" src="{{=URL('static','js/dygraph-combined-dev.js')}}"></script>
 
-<div id="graphdiv"></div>
+<div id="graphdiv1"></div>
+<div id="graphdiv2"></div>
 
 <script type="text/javascript">
 $(function() {
-    g = new Dygraph(
-        document.getElementById("graphdiv"),
+    G1 = new Dygraph(
+        document.getElementById("graphdiv1"),
         "/flurbo/static/data/demo.txt"
     );
+
+    G2 = new Dygraph(
+        document.getElementById("graphdiv2"),
+        "/flurbo/static/data/demo.txt"
+    );
+
 })
 </script>
