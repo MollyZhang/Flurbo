@@ -108,20 +108,18 @@ def load_week_data():
     this_week_spent = get_spent(spendings, current_budget_category)[1]
     previous_week_spent = get_spent(spendings, current_budget_category)[0]
     previous_budget_sum = get_previous_budget_sum(current_budget_category)
-
-
-    # budget_categories = []
-    # for
-    #
-    # if len(previous_week_spent) == 0 and len(previous_budget_sum) == 0:
-    #     current_available_budget = dict(preset_budget)
-    # else:
-    #     # TODO: deal with budget history
-    #     raise Exception("UnImplmentedError")
+    current_available_budget = get_current_available_budget(preset_budget, previous_week_spent, previous_budget_sum)
 
     return response.json(dict(preset_budget=preset_budget,
                               this_week_spent=this_week_spent,
-                              current_available_budget=1))
+                              current_available_budget=current_available_budget))
+
+def get_current_available_budget(preset_budget, previous_spent, previous_budget):
+    current_available = {}
+    for budget in preset_budget:
+        name = budget['name']
+        current_available[name] = previous_budget[name] - previous_spent[name] + budget['amount']
+    return current_available
 
 def get_current_budget_categories(budgets):
     categories = []
@@ -138,16 +136,13 @@ def get_previous_budget_sum(categories):
     for category in categories:
         budget_sum[category] = 0
     budgets = db(db.budget.user_id==auth.user_id).select()
-    # for budget in budgets:
-    #     print datetime.datetime.strptime(budget.start_date, "%Y%m%d")
-    #    if datetime.datetime.strptime(budget.start_date, "%Y%m%d") >= this_Monday:
-    #         pass
-    #     else:
-    #         if budget.name not in budget_sum.keys():
-    #             budget_sum[budget.name] = budget.amount
-    #         else:
-    #             budget_sum[budget.name] += budget.amount
-    # return budget_sum
+    for budget in budgets:
+        if datetime.datetime.strptime(budget.start_date, "%Y%m%d") >= this_Monday:
+            pass
+        else:
+            if budget.name in categories:
+                budget_sum[budget.name] += budget.amount
+    return budget_sum
 
 def get_spent(spendings, categories):
     """only return the current and past spendings based on the given budget categories """
@@ -186,14 +181,12 @@ def save_initial():
     db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
     budgets = json.loads(request.vars.budgets)
     for budget in budgets:
-        print budget
         db.budget.insert(user_id=user_id, name=budget['name'],
                          amount=int(budget['amount']), start_date=this_Monday)
     fixed_spendings = json.loads(request.vars.fixed_spendings)
     for spending in fixed_spendings:
         db.fixed_spending.insert(user_id=user_id, name=spending['name'],
                                  amount=int(spending['amount']), start_month=this_month)
-    print "hey I am ran"
     return "ok"
 
 

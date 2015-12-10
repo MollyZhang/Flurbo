@@ -30,9 +30,9 @@
                     <tr>
                         <td>{% preset_budget[i]['name'] %}</td>
                         <td>{% preset_budget[i]['amount'] %}</td>
-                        <td></td>
+                        <td>{% current_available[preset_budget[i]['name']] %}</td>
                         <td>{% this_week_spent[preset_budget[i]['name']] %}</td>
-                        <td></td>
+                        <td>{% leftover[preset_budget[i]['name']] %}</td>
                         <td><input id="spending_{% i %}"/></td>
                         <td>
                             <span class="btn btn-success btn-sm" id="add_btn_{% i %}"
@@ -62,6 +62,7 @@ $(function() {
         data: {
             preset_budget: [],
             this_week_spent: [],
+            current_available: [],
             leftover:[]
         }
     });
@@ -70,24 +71,24 @@ $(function() {
         {
         method: 'POST',
         success: function (data) {
-            console.log(data);
+            //console.log(data);
             MAIN.set('preset_budget', data['preset_budget']);
             MAIN.set('this_week_spent', data['this_week_spent']);
-            // reset_leftover();
+            MAIN.set('current_available', data['current_available_budget'])
+            reset_leftover();
             }
         }
     );
 
-    // function reset_leftover(){
-    //     var categories = MAIN.get('categories');
-    //     var spendings = MAIN.get('spendings');
-    //     var leftover = [];
-    //     for (i=0;i<categories.length;i++){
-    //         var this_left_over = parseInt(categories[i]['budget']) - parseInt(spendings[i]);
-    //         leftover.push(this_left_over);
-    //     }
-    //     MAIN.set('leftover', leftover);
-    // }
+    function reset_leftover(){
+        var available = MAIN.get('current_available');
+        var spent = MAIN.get('this_week_spent');
+        var leftover = {};
+        for (k in spent){
+            leftover[k] = available[k] - spent[k]
+        }
+        MAIN.set('leftover', leftover);
+    }
 
     MAIN.on('add-spending', function(e) {
         var index = $(e.original.target).data('index');
@@ -104,6 +105,7 @@ $(function() {
             success: function (data) {
                 this_week_spent[budget_category] += amount
                 MAIN.set('this_week_spent', this_week_spent);
+                reset_leftover();
                 // set the input field value to nothing and hide add button for two seconds
                 input_field = $('#spending_' + index);
                 input_field.val('');
