@@ -122,7 +122,7 @@ def get_this_week_spending(spendings_by_user, budgets):
 @auth.requires_login()
 @auth.requires_signature()
 def save_initial():
-    """save the initial income, budget and fixed_spending to database"""
+    """save the initial income, budget and fixed_spending to database """
     user_id = auth.user_id
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
@@ -144,9 +144,15 @@ def save_initial():
     return "ok"
 
 
+@auth.requires_login()
+@auth.requires_signature()
+def save_edit():
+    """save the income (for the next month), budget (for the next week) and
+    fixed_spending (for the next month) to database"""
+    print request.vars
 
 
-
+    return "ok"
 
 
 @auth.requires_login()

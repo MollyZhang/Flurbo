@@ -15,7 +15,7 @@
                 <div>Your current monthly income: {% current_income %}</div>
                 Edit your income for next month: 
                 {% #if adding_income %}
-                    <input value="{% income %}" />
+                    <input value="{% future_income %}" />
                     <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
                 {% else %}
                     <span>{% future_income %}</span>
@@ -230,24 +230,22 @@ $(function() {
             MAIN.set('future_budgets', data['future_budgets']);
             MAIN.set('current_fixed_spendings', data['current_fixed_spendings']);
             MAIN.set('future_fixed_spendings', data['future_fixed_spendings']);
-            //MAIN.set('total', calculate_total_budget());
+            set_total();
             }
         }
     );
 
-
-
-    function calculate_total_budget() {
+    function set_total() {
         var total = 0;
-        fixed = MAIN.get('fixed_spendings');
-        budgets = MAIN.get('budgets');
+        fixed = MAIN.get('future_fixed_spendings');
+        budgets = MAIN.get('future_budgets');
         for (i=0; i<fixed.length; ++i) {
             total += parseInt(fixed[i]['amount'])
         }
         for (i=0; i<budgets.length; ++i) {
             total += parseInt(budgets[i]['amount'])* 30 / 7
         }
-        return Math.round(total);
+        MAIN.set('total', parseInt(total));
     }
 
     MAIN.on('add-budget', function(){
@@ -259,16 +257,18 @@ $(function() {
         var amount = $('#category_budget').val();
         MAIN.set('adding_budget', false);
         var new_budget = {"name": name, "amount": amount};
-        var updated_budget = MAIN.get('budgets');
+        var updated_budget = MAIN.get('future_budgets');
         updated_budget.push(new_budget);
-        MAIN.set('budgets', updated_budget);
-        MAIN.set('total', calculate_total_budget());
+        MAIN.set('future_budgets', updated_budget);
+        set_total();
     });
 
     MAIN.on("save_income", function() {
         MAIN.set("adding_income", false);
-        income = MAIN.get('income');
+        future_income = parseInt(MAIN.get('future_income'));
+        MAIN.set('future_income', future_income);
     });
+
     MAIN.on("edit_income", function() {
         MAIN.set("adding_income", true);
     });
@@ -282,19 +282,19 @@ $(function() {
         var amount = $('#spending_amount').val();
         MAIN.set('adding_fixed', false);
         var new_spending = {"name": name, "amount": amount};
-        var updated_spending = MAIN.get('fixed_spendings');
+        var updated_spending = MAIN.get('future_fixed_spendings');
         updated_spending.push(new_spending);
-        MAIN.set('fixed_spendings', updated_spending);
-        MAIN.set('total', calculate_total_budget());
+        MAIN.set('future_fixed_spendings', updated_spending);
+        set_total();
     });
 
     MAIN.on("delete_budget", function(e) {
         var index = $(e.original.target).data('index');
-        budgets = MAIN.get('budgets');
+        budgets = MAIN.get('future_budgets');
         target_budgets = budgets[index];
         budgets.splice(index,1);
-        MAIN.set('budgets', budgets);
-        MAIN.set('total', calculate_total_budget());
+        MAIN.set('future_budgets', budgets);
+        set_total();
     });
 
     MAIN.on("edit_budget", function(e) {
@@ -304,17 +304,16 @@ $(function() {
 
     MAIN.on("save-budget-edit", function(e) {
         MAIN.set('budget_under_edit', -1);
-        MAIN.set('total', calculate_total_budget());
-
-    })
+        set_total();
+    });
 
     MAIN.on("delete_fixed", function(e) {
         var index = $(e.original.target).data('index');
-        fixed = MAIN.get('fixed_spendings');
+        fixed = MAIN.get('future_fixed_spendings');
         target_fixed = fixed[index];
         fixed.splice(index,1);
-        MAIN.set('fixed_spendings', fixed);
-        MAIN.set('total', calculate_total_budget());
+        MAIN.set('future_fixed_spendings', fixed);
+        set_total();
     });
 
     MAIN.on("edit_fixed", function(e) {
@@ -324,32 +323,29 @@ $(function() {
 
     MAIN.on("save-fixed-edit", function(e) {
         MAIN.set('fixed_under_edit', -1);
-        MAIN.set('total', calculate_total_budget());
+        set_total();
     });
 
     MAIN.on('save-all', function() {
-        console.log("save-all button pushed");
-        fixed_spendings = MAIN.get('fixed_spendings');
-        income = MAIN.get('income');
-        budgets = MAIN.get('budgets');
-        console.log("fixed_spendings", fixed_spendings);
-        console.log("income", income);
-        console.log("budgets", budgets);
-        if (income === 0 || fixed_spendings.length === 0 || budgets.length === 0 ) {
-            alert("Income can't be 0, weekly budget or fixed spendings can not be empty");
+        console.log(MAIN.data);
+        future_fixed_spendings = MAIN.get('future_fixed_spendings');
+        future_budgets = MAIN.get('future_budgets');
+        future_income = MAIN.get('future_income');
+        if (future_income === 0 || future_budgets.length === 0 ) {
+            alert("Income or weekly budget cannot be empty");
         }
         else {
-            $.ajax("{{=URL('default', 'save_initial', user_signature=True)}}",
+            $.ajax("{{=URL('default', 'save_edit', user_signature=True)}}",
                 {
                 method: 'POST',
                 data: {
-                    fixed_spendings: JSON.stringify(fixed_spendings),
-                    budgets: JSON.stringify(budgets),
-                    income: income,
+                    future_fixed_spendings: JSON.stringify(future_fixed_spendings),
+                    future_budgets: JSON.stringify(future_budgets),
+                    future_income: future_income,
                     }
                 }
             );
-            window.location.href="{{=URL('default',"this_week")}}";            
+            //window.location.href="{{=URL('default',"this_week")}}";            
         }
     });
 });
