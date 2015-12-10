@@ -42,27 +42,59 @@ def summary():
 
 
 #############################################################################
-
 ######### This part loads data for the views#################################
+#############################################################################
 
 @auth.requires_login()
 @auth.requires_signature()
 def load_data():
-    categories = db(db.category.user_id == auth.user_id).select().as_list()
-    fixed_spendings = db(db.fixed_spending.user_id == auth.user_id).select().as_list()
-    income = db(db.monthly_income.user_id == auth.user_id).select().as_list()
-    spendings_by_user = db(db.spending_history.user_id == auth.user_id).select()
-    spendings_by_user_this_week = get_this_week_spending(spendings_by_user, categories)
-    budget_this_week = get_this_week_budget(categories)
-    return response.json(dict(categories=budget_this_week,
-                              fixed_spendings=fixed_spendings,
-                              income=income,
-                              spendings=spendings_by_user_this_week))
+    now = datetime.datetime.now()
+    this_month = now.strftime('%Y%m')
+    this_Monday = now.strftime('%Y%m%d')
+    next_month = get_next_month(now)
+    next_Monday = (now + datetime.timedelta(days=7)).strftime('%Y%m%d')
 
-def get_this_week_budget(categories):
+    income_query1 = (db.monthly_income.user_id == auth.user_id)
+    income_query2 = (db.monthly_income.start_month == this_month)
+    income_query3 = (db.monthly_income.start_month == next_month)
+    current_income = db(income_query1&income_query2).select().as_list()
+    future_income = db(income_query1&income_query3).select().as_list()
+    if len(future_income) == 0:
+        future_income = current_income
+
+    budget_query1 = (db.budget.user_id ==auth.user_id)
+    budget_query2 = (db.budget.start_date == this_Monday)
+    budget_query3 = (db.budget.start_date == next_Monday)
+    current_budgets = db(budget_query1&budget_query2).select().as_list()
+    future_budgets = db(budget_query1&budget_query3).select().as_list()
+    if len(future_budgets) == 0:
+        future_budgets = current_budgets
+
+    fixed_query1 = (db.fixed_spending.user_id ==auth.user_id)
+    fixed_query2 = (db.fixed_spending.start_month == this_month)
+    fixed_query3 = (db.fixed_spending.start_month == next_month)
+    current_fixed_spendings = db(fixed_query1 & fixed_query2).select().as_list()
+    future_fixed_spendings = db(fixed_query1 & fixed_query3).select().as_list()
+    if len(future_fixed_spendings) == 0:
+        future_fixed_spendings = current_fixed_spendings
+
+    return response.json(dict(current_income=current_income, future_income=future_income,
+                              current_budgets=current_budgets, future_budgets=future_budgets,
+                              current_fixed_spendings=current_fixed_spendings,
+                              future_fixed_spendings=future_fixed_spendings))
+
+
+def get_next_month(now):
+    beginning_of_this_month = now.replace(day=1, hour=0, minute=0, second=1)
+    days_in_this_month = calendar.monthrange(now.year, now.month)[1]
+    next_month = beginning_of_this_month + datetime.timedelta(days=days_in_this_month)
+    return next_month.strftime('%Y%m')
+
+
+def get_this_week_budget(budgets):
     this_week = []
     now = datetime.datetime.now()
-    for budget in categories:
+    for budget in budgets:
         if (now - budget['start_time']).days >= 0 and (now-budget['start_time']).days <= 7:
             this_week.append(budget)
     return this_week
@@ -83,124 +115,39 @@ def get_this_week_spending(spendings_by_user, budgets):
 
 
 #############################################################################
-
 ######### this part handle all the savings to database ######################
+#############################################################################
+
+
 @auth.requires_login()
 @auth.requires_signature()
-def save_all():
+def save_initial():
+    """save the initial income, budget and fixed_spending to database"""
     user_id = auth.user_id
     now = datetime.datetime.now()
+    this_month = now.strftime('%Y%m')
+    this_Monday = now.strftime('%Y%m%d')
+    # save initial income to db
     income = int(request.vars.income)
-    save_income(income, user_id, now)
+    db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
+    # save initial budgets to db
     budgets = json.loads(request.vars.budgets)
-    print income
-    save_budgets(budgets, user_id, now)
+    for budget in budgets:
+        db.budget.insert(user_id=user_id, name=budget['name'],
+                         amount=int(budget['amount']), start_date=this_Monday)
+    # save initial fixed spending to db
+    fixed_spendings = json.loads(request.vars.fixed_spendings)
+    for spending in fixed_spendings:
+        db.fixed_spending.insert(user_id=user_id, name=spending['name'],
+                                 amount=int(spending['amount']), start_month=this_month)
 
-    # fixed_spendings = json.loads(request.vars.fixed_spendings)
-    # this_monday = (now - datetime.timedelta(days=now.weekday())).replace(hour=0,minute=0,second=1)
-    # next_monday = this_monday + datetime.timedelta(days=7)
-    # beginning_of_this_month = now.replace(day=1, hour=0, minute=0, second=1)
-    # days_in_this_month = calendar.monthrange(now.year, now.month)[1]
-    # beginning_of_next_month = now + datetime.timedelta(days=days_in_this_month)
-    # if initial:
-    #     save_initial_budget(budgets, auth.user_id, this_monday)
-    #     save_initial_fixed_spending(fixed_spendings,auth.user_id,beginning_of_this_month)
-    # else:
-    #     save_next_week_budget(budgets, auth.user_id, next_monday)
-    #     save_next_month_fixed(fixed_spendings, auth.user_id, beginning_of_next_month)
     return "ok"
 
-def save_income(income, user_id, now):
-    """
-    Logic of the income saving procedure:
-    if no record exisits for this user: insert new record
-    else: (record exists for this user)
-        get time of next month
-        if this user's record exist for next month:
-            case1: same amount for next month: do nothing
-            case2: different amount for next month: update record amount
-        else: (this user's record doesn't exist for next month)
-            insert this user's record for next month
-    """
-    this_month = str(now.year) + str(now.month)
-    next_month = get_next_month(now)
-    query1 = (db.monthly_income.user_id == user_id)
-    query2 = (db.monthly_income.start_month == next_month)
-    user_records = db(query1).select()
-    if len(user_records) == 0:
-        db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
-    else:
-        record_next_month = db(query1 & query2).select()
-        if len(record_next_month) == 0:
-            db.monthly_income.insert(user_id=user_id, amount=income,start_month=next_month)
-        else:
-            if record_next_month.first().amount == income:
-                pass
-            else:
-                db(query1&query2).update(amount=income)
-
-
-def get_next_month(now):
-    beginning_of_this_month = now.replace(day=1, hour=0, minute=0, second=1)
-    days_in_this_month = calendar.monthrange(now.year, now.month)[1]
-    next_month = beginning_of_this_month + datetime.timedelta(days=days_in_this_month)
-    return str(next_month.year) + str(next_month.month)
-
-def save_budgets(budgets, user_id, now):
-    """
-    similar logic to income operation:
-    if no user record exist: insert budget record for this week
-    else:
-        if existing budget record is only for this week:
-            insert input budget for next week
-        else budget record exist for next week too:
-            compare two lists: L1(next_week_list_old), L2(next_week_list_new)
-                1. for budget category that exist L2 but not in L1: insert them
-                2. for budget category that exist in L1 but not in L2: delete them from database
-                3. for budget categories that exist in both: update amount in L1 to the amount in L2
-    """
-    pass
 
 
 
 
 
-def save_initial_fixed_spending(fixed_spendings, user_id, time):
-    for spending in fixed_spendings:
-        db.fixed_spending.insert(user_id=auth.user_id,
-                                 name=spending['name'],
-                                 amount=int(spending['amount']),
-                                 start_time=time)
-
-# def save_initial_budget(budgets, user_id, this_monday):
-#     for budget in budgets:
-#             db.category.insert(user_id=auth.user_id,
-#                                name=budget['name'],
-#                                budget=int(budget['budget']),
-#                                start_time=this_monday)
-#
-# def save_next_week_budget(budgets, user_id, next_monday):
-#     for budget in budgets:
-#         q1 = (db.category.user_id==user_id)
-#         q2 = (db.category.name == budget['name'])
-#         q3 = (db.category.start_time == next_monday)
-#         db.category.update_or_insert(q1 & q2 & q3,
-#                                      user_id=user_id,
-#                                      name=budget['name'],
-#                                      budget=int(budget['budget']),
-#                                      start_time=next_monday)
-
-
-def save_next_month_fixed(fixed_spendings, user_id, time):
-    for spending in fixed_spendings:
-        q1 = (db.fixed_spending.user_id==user_id)
-        q2 = (db.fixed_spending.name == spending['name'])
-        q3 = (db.fixed_spending.start_time == time)
-        db.fixed_spending.update_or_insert(q1 & q2 & q3,
-                                     user_id=user_id,
-                                     name=spending['name'],
-                                     amount=int(spending['amount']),
-                                     start_time=time)
 
 @auth.requires_login()
 @auth.requires_signature()
@@ -216,18 +163,16 @@ def save_spending_history():
         return "wrong value"
 
 ##############################################################
-
-
 ############## this part handles all the deletions ###########
-@auth.requires_signature()
-def delete_budget_category():
-    db(db.category.id == request.vars.category_id).delete()
-    return "ok"
-
-@auth.requires_signature()
-def delete_fixed_spending():
-    db(db.fixed_spending.id == request.vars.fixed_id).delete()
-    return "ok"
+# @auth.requires_signature()
+# def delete_budget_category():
+#     db(db.category.id == request.vars.category_id).delete()
+#     return "ok"
+#
+# @auth.requires_signature()
+# def delete_fixed_spending():
+#     db(db.fixed_spending.id == request.vars.fixed_id).delete()
+#     return "ok"
 
 #################################################################
 

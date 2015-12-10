@@ -15,10 +15,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% #categories:i %}
+                    {% #budgets:i %}
                     <tr>
-                        <td>{% categories[i]['name'] %}</td>
-                        <td>{% categories[i]['budget'] %}</td>
+                        <td>{% budgets[i]['name'] %}</td>
+                        <td>{% budgets[i]['amount'] %}</td>
                         <td>{% spendings[i] %}</td>
                         <td>{% leftover[i] %}</td>
                         <td><input id="spending_{% i %}"/>
@@ -27,7 +27,7 @@
                             on-click="add-spending">Add</span>
                         </td>
                     </tr>
-                    {% /categories %}
+                    {% /budgets %}
                 </tbody>
                 </table>
             </div>
@@ -37,11 +37,10 @@
 
 <div id="target"></div>
 <div class="container">
-    <a class="btn btn-info" href="{{=URL('default', 'edit')}}">change my budget</a>
-    <a class="btn btn-warning" href="{{=URL('default', 'spending_history')}}">view my spending history</a>
+    <a class="btn btn-info" href="{{=URL('default', 'edit_budget')}}">change my budget</a>
+    <a class="btn btn-warning" href="{{=URL('default', 'spending_history')}}">my spending history</a>
     <a class="btn btn-success" href="{{=URL('default', 'summary')}}">summary</a>
 </div>
-
 
 
 
@@ -53,22 +52,22 @@ $(function() {
         delimiters: ['{%', '%}'],
         tripleDelimiters: ['{%%', '%%}'],
         data: {
-            categories: [],
+            budgets: [],
             spendings: [],
             leftover:[]
         }
     });
 
-    $.ajax("{{=URL('default', 'load_data', user_signature=True)}}",
-        {
-        method: 'POST',
-        success: function (data) {
-            MAIN.set('categories', data['categories']);
-            MAIN.set('spendings', data['spendings']);
-            reset_leftover();
-            }
-        }
-    );
+    // $.ajax("{{=URL('default', 'load_data', user_signature=True)}}",
+    //     {
+    //     method: 'POST',
+    //     success: function (data) {
+    //         MAIN.set('categories', data['categories']);
+    //         MAIN.set('spendings', data['spendings']);
+    //         reset_leftover();
+    //         }
+    //     }
+    // );
 
     function reset_leftover(){
         var categories = MAIN.get('categories');
