@@ -3,23 +3,29 @@
 <script type="text/javascript" src="{{=URL('static','js/dygraph-combined-dev.js')}}"></script>
 
 <div id="budget_history"></div>
+<div id="spending_history"></div>
+
 
 <script type="text/javascript">
 $(function() {
-    file_name = "/flurbo/static/data/" + "{{=budget_history_file_name}}";
+    budget_history_file_name = "/flurbo/static/data/" + "{{=budget_history_file_name}}";
     G1 = new Dygraph(
         document.getElementById("budget_history"),
-        file_name,
-        {
-            title: 'Budget_history',
-            ylabel: 'Budget Amount'
-        }
+        budget_history_file_name,
+            {
+                title: 'Budget History',
+                ylabel: 'Budget Amount'
+            }
     );
 
-//    G2 = new Dygraph(
-//        document.getElementById("graphdiv2"),
-//        "/flurbo/static/data/demo.txt"
-//    );
-
+    spending_history_file_name = "/flurbo/static/data/" + "{{=spending_history_file_name}}";
+    G2 = new Dygraph(
+        document.getElementById("spending_history"),
+        spending_history_file_name,
+            {
+                title: "Spending Hisotry",
+                ylabel: "Amount spent"
+            }
+    );
 })
 </script>

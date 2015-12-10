@@ -2,6 +2,7 @@ private/*
 !private/appconfig.ini
 progress.log
 cache/*
+static/data/*
 databases/*
 errors/*
 sessions/*

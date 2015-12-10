@@ -40,13 +40,42 @@ def summary():
     budget_history_file_name = save_budget_history_to_file(budgets, auth.user_id)
     spendings = db(db.spending_history.user_id==auth.user_id).select()
     spending_history_file_name = save_spending_history_to_file(spendings, auth.user_id)
-    return dict(budget_history_file_name=budget_history_file_name)
+    return dict(budget_history_file_name=budget_history_file_name,
+                spending_history_file_name=spending_history_file_name)
 
 def save_spending_history_to_file(spendings, user_id):
-    pass
+    path="/Users/Molly/Desktop/CMPS183/web2py/web2py/applications/flurbo/static/data/"
+    file_name = str(user_id) + "_spending_history_updated_" + str(datetime.datetime.now().date()) + ".txt"
+    spending_dict = {}
+    for spending in spendings:
+        spending_date = str(spending.time_stamp.date())
+        if spending_date not in spending_dict.keys():
+            spending_dict[spending_date] = {spending.budget_category: spending.amount}
+        else:
+            if spending.budget_category not in spending_dict[spending_date].keys():
+                spending_dict[spending_date][spending.budget_category] = spending.amount
+            else:
+                spending_dict[spending_date][spending.budget_category] += spending.amount
+    f = open(path + file_name, "w")
+    first_line = "date"
+    budget_names = get_all_budget_names_from_spendings(spendings)
+    for budget_name in budget_names:
+        first_line = first_line + "," + budget_name
+    f.write(first_line + "\n")
+    for date in sorted(spending_dict.keys()):
+        new_line = date
+        for budget_name in budget_names:
+            new_line = new_line + "," + str(spending_dict[date][budget_name])
+        f.write(new_line + "\n")
+    return file_name
 
 
-
+def get_all_budget_names_from_spendings(spendings):
+    names = []
+    for spending in spendings:
+        if spending.budget_category not in names:
+            names.append(spending.budget_category)
+    return sorted(names)
 
 def save_budget_history_to_file(budgets, user_id):
     path="/Users/Molly/Desktop/CMPS183/web2py/web2py/applications/flurbo/static/data/"
