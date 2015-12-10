@@ -2,20 +2,24 @@
 
 <script type="text/javascript" src="{{=URL('static','js/dygraph-combined-dev.js')}}"></script>
 
-<div id="graphdiv1"></div>
-<div id="graphdiv2"></div>
+<div id="budget_history"></div>
 
 <script type="text/javascript">
 $(function() {
+    file_name = "/flurbo/static/data/" + "{{=budget_history_file_name}}";
     G1 = new Dygraph(
-        document.getElementById("graphdiv1"),
-        "/flurbo/static/data/demo.txt"
+        document.getElementById("budget_history"),
+        file_name,
+        {
+            title: 'Budget_history',
+            ylabel: 'Budget Amount'
+        }
     );
 
-    G2 = new Dygraph(
-        document.getElementById("graphdiv2"),
-        "/flurbo/static/data/demo.txt"
-    );
+//    G2 = new Dygraph(
+//        document.getElementById("graphdiv2"),
+//        "/flurbo/static/data/demo.txt"
+//    );
 
 })
 </script>

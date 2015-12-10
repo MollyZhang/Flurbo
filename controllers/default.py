@@ -37,28 +37,47 @@ def edit_budget():
 def summary():
     # save budget history and spending history to txt file to be read later
     budgets = db(db.budget.user_id==auth.user_id).select()
-    save_budget_history_to_file(budgets, auth.user_id)
-    return dict()
+    budget_history_file_name = save_budget_history_to_file(budgets, auth.user_id)
+    spendings = db(db.spending_history.user_id==auth.user_id).select()
+    spending_history_file_name = save_spending_history_to_file(spendings, auth.user_id)
+    return dict(budget_history_file_name=budget_history_file_name)
+
+def save_spending_history_to_file(spendings, user_id):
+    pass
+
+
 
 
 def save_budget_history_to_file(budgets, user_id):
     path="/Users/Molly/Desktop/CMPS183/web2py/web2py/applications/flurbo/static/data/"
-    file_name = str(user_id) + "_budget_history_updated_" + str(datetime.datetime.now().date())
+    file_name = str(user_id) + "_budget_history_updated_" + str(datetime.datetime.now().date()) + ".txt"
     budget_dict = {}
     for budget in budgets:
         if budget.start_date not in budget_dict.keys():
             budget_dict[budget.start_date] = {budget.name:budget.amount}
         else:
             budget_dict[budget.start_date][budget.name] = budget.amount
-    
+    f = open(path+file_name, "w")
+    first_line = "date"
+    budget_names = get_all_budget_names(budgets)
+    for budget_name in budget_names:
+        first_line = first_line + "," + budget_name
+    f.write(first_line + "\n")
+    for date in sorted(budget_dict.keys()):
+        correct_date_format = datetime.datetime.strptime(date, "%Y%m%d").strftime("%Y-%m-%d")
+        new_line = correct_date_format
+        for budget_name in budget_names:
+            new_line = new_line + "," + str(budget_dict[date][budget_name])
+        f.write(new_line + "\n")
+    return file_name
 
+def get_all_budget_names(budgets):
+    names = []
+    for budget in budgets:
+        if budget.name not in names:
+            names.append(budget.name)
+    return sorted(names)
 
-    # f = open(path+file_name+".txt", "w")
-    # first_line = "date"
-    # for budget in budgets:
-    #     first_line = first_line + "," + budget.name
-    # print first_line
-    print budget_dict
 
 
 #############################################################################
