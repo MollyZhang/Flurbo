@@ -2,6 +2,7 @@
 
 <script type="text/javascript" src="{{=URL('static','js/dygraph-combined-dev.js')}}"></script>
 
+<div id="demo"></div>
 <div id="budget_history"></div>
 <div id="spending_history"></div>
 
@@ -9,6 +10,16 @@
 <script type="text/javascript">
 $(function() {
     budget_history_file_name = "/flurbo/static/data/" + "{{=budget_history_file_name}}";
+
+    G0 = new Dygraph(
+        document.getElementById('demo'),
+        '/flurbo/static/data/demo.txt',
+        {
+            title: 'Food budget and spending (demo)',
+            ylabel: "dollar"
+        }
+    );
+
     G1 = new Dygraph(
         document.getElementById("budget_history"),
         budget_history_file_name,

@@ -241,6 +241,7 @@ def get_spent(spendings, categories):
 @auth.requires_signature()
 def save_initial():
     """save the initial income, budget and fixed_spending to database """
+    print request.vars
     user_id = auth.user_id
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
