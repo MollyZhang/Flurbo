@@ -127,15 +127,12 @@ def save_initial():
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
     this_Monday = now.strftime('%Y%m%d')
-    # save initial income to db
     income = int(request.vars.income)
     db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
-    # save initial budgets to db
     budgets = json.loads(request.vars.budgets)
     for budget in budgets:
         db.budget.insert(user_id=user_id, name=budget['name'],
                          amount=int(budget['amount']), start_date=this_Monday)
-    # save initial fixed spending to db
     fixed_spendings = json.loads(request.vars.fixed_spendings)
     for spending in fixed_spendings:
         db.fixed_spending.insert(user_id=user_id, name=spending['name'],
@@ -147,11 +144,31 @@ def save_initial():
 @auth.requires_login()
 @auth.requires_signature()
 def save_edit():
-    """save the income (for the next month), budget (for the next week) and
-    fixed_spending (for the next month) to database"""
-    print request.vars
+    """update data for next week/month to database by deleting old ones and inserting new ones"""
+    now = datetime.datetime.now()
+    next_Monday = (now + datetime.timedelta(days=7)).strftime("%Y%m%d")
+    next_month = get_next_month(now)
 
+    income_query1 = (db.monthly_income.user_id == auth.user_id)
+    income_query2 = (db.monthly_income.start_month == next_month)
+    budget_query1 = (db.budget.user_id ==auth.user_id)
+    budget_query2 = (db.budget.start_date == next_Monday)
+    fixed_query1 = (db.fixed_spending.user_id ==auth.user_id)
+    fixed_query2 = (db.fixed_spending.start_month == next_month)
+    db(income_query1 & income_query2).delete()
+    db(budget_query1 & budget_query2).delete()
+    db(fixed_query1 & fixed_query2).delete()
 
+    income = int(request.vars.future_income)
+    db.monthly_income.insert(user_id=auth.user_id, amount=income,start_month=next_month)
+    budgets = json.loads(request.vars.future_budgets)
+    for budget in budgets:
+        db.budget.insert(user_id=auth.user_id, name=budget['name'],
+                         amount=int(budget['amount']), start_date=next_Monday)
+    fixed_spendings = json.loads(request.vars.future_fixed_spendings)
+    for spending in fixed_spendings:
+        db.fixed_spending.insert(user_id=auth.user_id, name=spending['name'],
+                                 amount=int(spending['amount']), start_month=next_month)
     return "ok"
 
 
