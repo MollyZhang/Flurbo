@@ -255,6 +255,7 @@ def save_initial():
     for spending in fixed_spendings:
         db.fixed_spending.insert(user_id=user_id, name=spending['name'],
                                  amount=int(spending['amount']), start_month=this_month)
+    print "done"
     return "ok"
 
 
