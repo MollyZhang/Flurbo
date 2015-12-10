@@ -6,8 +6,11 @@ import os
 
 ############### This part is the controller for all views #################
 
-@auth.requires_login()
 def index():
+    return dict()
+
+@auth.requires_login()
+def initial():
     return dict()
 
 @auth.requires_login()
