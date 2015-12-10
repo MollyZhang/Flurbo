@@ -124,7 +124,8 @@ def load_budget_data():
     this_Monday = (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d')
 
     next_month = get_next_month(now)
-    next_Monday = (now + datetime.timedelta(days=7)).strftime('%Y%m%d')
+    nM = now - datetime.timedelta(days=now.weekday())
+    next_Monday = (nM + datetime.timedelta(days=7)).strftime('%Y%m%d')
 
     income_query1 = (db.monthly_income.user_id == auth.user_id)
     income_query2 = (db.monthly_income.start_month == this_month)
@@ -267,6 +268,7 @@ def save_initial():
 @auth.requires_signature()
 def save_edit():
     """update data for next week/month to database by deleting old ones and inserting new ones"""
+    print request.vars
     now = datetime.datetime.now()
     this_Monday = now - datetime.timedelta(days=now.weekday())
     next_Monday = (this_Monday + datetime.timedelta(days=7)).strftime("%Y%m%d")

@@ -9,24 +9,28 @@
         <p>Take five minutes to set your income, weekly budget items and monthly fixed spendings!</p>
         <a class="btn btn-success btn-lg" on-click="save-all">Save My Changes</a>
     </div>
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <span style="font-size: 30px">Your monthly income:
-            {% #if adding_income %}
-                <input value="{% income %}" />
-                <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
-            {% else %}
-                <span>{% income %}</span>
-                <i class="btn btn-default btn-sm fa fa-pencil" on-click="edit_income"></i>
-            {% /if %}
-            </span>
+    <div class="col-md-6">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <span style="font-size: 30px">Your monthly income:
+                {% #if adding_income %}
+                    <input value="{% income %}" />
+                    <i class="btn btn-default btn-sm fa fa-floppy-o" on-click='save_income'></i>
+                {% else %}
+                    <span>{% income %}</span>
+                    <i class="btn btn-success btn-xs fa fa-pencil" on-click="edit_income"></i>
+                {% /if %}
+                </span>
+            </div>
         </div>
     </div>
-    <div class="panel panel-warning">
-        <div class="panel-heading">
-            <span style="font-size: 30px">
-                Your total monthly budget: {% total %}</span>
-            </span>
+    <div class="col-md-6">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <span style="font-size: 30px">
+                    Your total monthly budget: {% total %}</span>
+                </span>
+            </div>
         </div>
     </div>
     <div class="row" style="margin: 40px">
