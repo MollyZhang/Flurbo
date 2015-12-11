@@ -245,22 +245,23 @@ def get_spent(spendings, categories):
 @auth.requires_signature()
 def save_initial():
     """save the initial income, budget and fixed_spending to database """
-    print request.vars
     user_id = auth.user_id
     now = datetime.datetime.now()
     this_month = now.strftime('%Y%m')
     this_Monday = (now - datetime.timedelta(days=now.weekday())).strftime('%Y%m%d')
     income = int(request.vars.income)
-    db.monthly_income.insert(user_id=user_id, amount=income,start_month=this_month)
+    db.monthly_income.update_or_insert(user_id=user_id, amount=income,start_month=this_month)
     budgets = json.loads(request.vars.budgets)
     for budget in budgets:
-        db.budget.insert(user_id=user_id, name=budget['name'],
+        db.budget.update_or_insert(user_id=user_id, name=budget['name'],
                          amount=int(budget['amount']), start_date=this_Monday)
     fixed_spendings = json.loads(request.vars.fixed_spendings)
     for spending in fixed_spendings:
-        db.fixed_spending.insert(user_id=user_id, name=spending['name'],
+        db.fixed_spending.update_or_insert(user_id=user_id, name=spending['name'],
                                  amount=int(spending['amount']), start_month=this_month)
-    print "done"
+    print "I am called"
+    redirect(URL('default', 'this_week'))
+
     return "ok"
 
 

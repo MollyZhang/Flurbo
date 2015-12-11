@@ -163,7 +163,7 @@ $(function() {
             income: 0,
             budgets: [],
             fixed_spendings: [],
-            total: 0,
+            total: 0
         }
     });
 
@@ -199,6 +199,7 @@ $(function() {
         MAIN.set("adding_income", false);
         income = MAIN.get('income');
     });
+
     MAIN.on("edit_income", function() {
         MAIN.set("adding_income", true);
     });
@@ -236,7 +237,7 @@ $(function() {
         MAIN.set('budget_under_edit', -1);
         MAIN.set('total', calculate_total_budget());
 
-    })
+    });
 
     MAIN.on("delete_fixed", function(e) {
         var index = $(e.original.target).data('index');
@@ -258,28 +259,27 @@ $(function() {
     });
 
     MAIN.on('save-all', function() {
-        console.log("save-all button pushed");
         fixed_spendings = MAIN.get('fixed_spendings');
         income = MAIN.get('income');
         budgets = MAIN.get('budgets');
-        console.log("fixed_spendings", fixed_spendings);
-        console.log("income", income);
-        console.log("budgets", budgets);
         if (income === 0 || fixed_spendings.length === 0 || budgets.length === 0 ) {
             alert("Income can't be 0, weekly budget or fixed spendings can not be empty");
         }
         else {
+            console.log(MAIN.data);
             $.ajax("{{=URL('default', 'save_initial', user_signature=True)}}",
                 {
-                method: 'POST',
-                data: {
-                    fixed_spendings: JSON.stringify(fixed_spendings),
-                    budgets: JSON.stringify(budgets),
-                    income: income
+                    method: 'POST',
+                    data: {
+                        fixed_spendings: JSON.stringify(fixed_spendings),
+                        budgets: JSON.stringify(budgets),
+                        income: income
+                        },
+                    success: function(){
+                        window.location.href="{{=URL('default',"this_week")}}";
                     }
                 }
             );
-            window.location.href="{{=URL('default',"this_week")}}";            
         }
     });
 });

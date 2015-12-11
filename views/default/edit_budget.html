@@ -336,16 +336,18 @@ $(function() {
         }
         else {
             $.ajax("{{=URL('default', 'save_edit', user_signature=True)}}",
-                {
-                method: 'POST',
-                data: {
-                    future_fixed_spendings: JSON.stringify(future_fixed_spendings),
-                    future_budgets: JSON.stringify(future_budgets),
-                    future_income: future_income,
+                    {
+                        method: 'POST',
+                        data: {
+                            future_fixed_spendings: JSON.stringify(future_fixed_spendings),
+                            future_budgets: JSON.stringify(future_budgets),
+                            future_income: future_income,
+                        },
+                        success: function () {
+                            window.location.href = "{{=URL('default',"this_week")}}";
+                        }
                     }
-                }
             );
-            window.location.href="{{=URL('default',"this_week")}}";
         }
     });
 });
