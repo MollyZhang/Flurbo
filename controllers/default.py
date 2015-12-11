@@ -11,6 +11,8 @@ def index():
 
 @auth.requires_login()
 def initial():
+    if len(db(db.budget.user_id == auth.user_id).select())>0:
+        redirect(URL('default','this_week'))
     return dict()
 
 @auth.requires_login()
