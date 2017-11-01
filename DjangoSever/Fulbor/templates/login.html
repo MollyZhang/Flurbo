@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load bootstrap_toolkit %}
+{% load url from future %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fulbor</title>
+    {% bootstrap_stylesheet_tag %}
+    {% bootstrap_stylesheet_tag "responsive" %}
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+        }
+    </style>
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    {% bootstrap_javascript_tag %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% if password_is_wrong %}
+    <div class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <h4>Important!</h4>Wrong Username or Password!
+    </div>
+{% endif %}
+<div class="well">
+    <h1>Fulbor</h1>
+    <p></p>
+    <form class="form-horizontal" action="" method="post">
+        {% csrf_token %}
+        {{ form|as_bootstrap:"horizontal" }}
+        <p class="form-actions">
+            <input type="submit" value="Log-in" class="btn btn-primary">
+            <a href="/contactme/"><input type="button" value="Forget Password" class="btn btn-danger"></a>
+            <a href="/contactme/"><input type="button" value="New User？" class="btn btn-success"></a>
+        </p>
+    </form>
+</div>
+
+</body>
+</html>
