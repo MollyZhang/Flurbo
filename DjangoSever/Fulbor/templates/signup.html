@@ -20,10 +20,10 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-{% if password_is_wrong %}
+{% if username_exist %}
     <div class="alert alert-error">
         <button type="button" class="close" data-dismiss="alert">×</button>
-        <h4>Important!</h4>Wrong Username or Password!
+        <h4>Important!</h4>Username existed,please change one!
     </div>
 {% endif %}
 <div class="well">
@@ -33,9 +33,8 @@
         {% csrf_token %}
         {{ form|as_bootstrap:"horizontal" }}
         <p class="form-actions">
-            <input type="submit" value="Log-in" class="btn btn-primary">
-            <a href="/contactme/"><input type="button" value="Forget Password" class="btn btn-danger"></a>
-            <a href="/account/signup/"><input type="button" value="New User？" class="btn btn-success"></a>
+            <input type="submit" value="Sign-up" class="btn btn-primary">
+            <a href="/"><input type="button" value="Cancel" class="btn btn-danger"></a>
         </p>
     </form>
 </div>
